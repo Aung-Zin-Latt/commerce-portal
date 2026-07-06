@@ -1,0 +1,19 @@
+# Environment
+.env
+
+# Composer
+/vendor
+
+# CodeIgniter
+application/logs/*
+!application/logs/index.html
+
+application/cache/*
+!application/cache/index.html
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
