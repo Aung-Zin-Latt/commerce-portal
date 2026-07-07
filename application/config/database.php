@@ -75,10 +75,11 @@ $query_builder = TRUE;
 
 $db['default'] = array(
 	'dsn'	=> '',
-	'hostname' => 'mysql',
-	'username' => 'app_user',
-	'password' => 'secret',
-	'database' => 'commerce_portal',
+	'hostname' => getenv('DB_HOST') !== FALSE ? getenv('DB_HOST') : 'mysql',
+	'port'     => getenv('DB_PORT') !== FALSE ? (int) getenv('DB_PORT') : 3306,
+	'username' => getenv('DB_USERNAME') !== FALSE ? getenv('DB_USERNAME') : 'app_user',
+	'password' => getenv('DB_PASSWORD') !== FALSE ? getenv('DB_PASSWORD') : 'secret',
+	'database' => getenv('DB_DATABASE') !== FALSE ? getenv('DB_DATABASE') : 'commerce_portal',
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
 	'pconnect' => FALSE,
