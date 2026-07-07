@@ -38,6 +38,16 @@
 
 /*
  *---------------------------------------------------------------
+ * LOAD ENVIRONMENT VARIABLES
+ *---------------------------------------------------------------
+ *
+ * Load variables from the project root .env file before the
+ * application environment is defined. OS/container values win.
+ */
+require_once dirname(__FILE__) . '/../application/config/env.php';
+
+/*
+ *---------------------------------------------------------------
  * APPLICATION ENVIRONMENT
  *---------------------------------------------------------------
  *
@@ -53,7 +63,19 @@
  *
  * NOTE: If you change these, also change the error_reporting() code below
  */
-	define('ENVIRONMENT', isset($_SERVER['CI_ENV']) ? $_SERVER['CI_ENV'] : 'development');
+	$ci_environment = getenv('APP_ENV');
+
+	if ($ci_environment === FALSE && isset($_SERVER['CI_ENV']))
+	{
+		$ci_environment = $_SERVER['CI_ENV'];
+	}
+
+	if ($ci_environment === FALSE)
+	{
+		$ci_environment = 'development';
+	}
+
+	define('ENVIRONMENT', $ci_environment);
 
 /*
  *---------------------------------------------------------------
