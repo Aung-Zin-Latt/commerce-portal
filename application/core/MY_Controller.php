@@ -58,7 +58,7 @@ class MY_Controller extends CI_Controller
 
         if (!$this->auth->isCustomer()) {
             $this->session->set_flashdata('error', 'You do not have permission to access that page.');
-            redirect('admin/users');
+            redirect('admin/dashboard');
         }
     }
 
@@ -104,7 +104,7 @@ class MY_Controller extends CI_Controller
         }
 
         if ($this->auth->isAdmin()) {
-            redirect('admin/users');
+            redirect('admin/dashboard');
         }
 
         if ($this->auth->isCustomer()) {

@@ -14,7 +14,7 @@ class Register extends MY_Controller
         $this->load->library('auth');
         $this->load->helper('form');
         $this->load->model('User_model');
-        $this->load->file(APPPATH . 'services/Auth_Service.php', true);
+        $this->load->file(APPPATH . 'services/Auth_service.php', true);
 
         $this->authService = new Auth_service();
     }
@@ -68,7 +68,7 @@ class Register extends MY_Controller
     protected function redirectByRole()
     {
         if ($this->auth->isAdmin()) {
-            return redirect('admin/users');
+            return redirect('admin/dashboard');
         }
 
         return redirect('user/products');

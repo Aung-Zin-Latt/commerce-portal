@@ -25,7 +25,7 @@ class Auth_service
      */
     public function attempt($email, $password)
     {
-        $user = $this->CI->User_model->findByEmail($email);
+        $user = $this->CI->User_model->findByEmailWithTrashed($email);
 
         if (!$user) {
             return [
@@ -37,7 +37,7 @@ class Auth_service
         if (!empty($user->deleted_at)) {
             return [
                 'success' => false,
-                'message' => 'This account has been deleted.',
+                'message' => 'Your account is no longer active.',
             ];
         }
 

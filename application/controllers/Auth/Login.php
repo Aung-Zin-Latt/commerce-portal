@@ -14,7 +14,7 @@ class Login extends MY_Controller
 
         $this->load->model('User_model');
 
-        $this->load->file(APPPATH . 'services/Auth_Service.php', true);
+        $this->load->file(APPPATH . 'services/Auth_service.php', true);
         $this->authService = new Auth_service();
     }
 
@@ -53,7 +53,7 @@ class Login extends MY_Controller
         }
 
         if ($this->auth->isAdmin()) {
-            return redirect('admin/users');
+            return redirect('admin/dashboard');
         }
 
         return redirect('user/products');

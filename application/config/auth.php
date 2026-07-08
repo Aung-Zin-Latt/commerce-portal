@@ -41,7 +41,7 @@ $config['auth_middleware'] = array(
         'type'             => 'session',
         'role'             => 'customer',
         'login_redirect'   => 'login',
-        'denied_redirect'  => 'admin/users',
+        'denied_redirect'  => 'admin/dashboard',
         'login_message'    => 'Please log in first.',
         'denied_message'   => 'You do not have permission to access that page.',
     ),

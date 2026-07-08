@@ -72,6 +72,15 @@ class Auth_middleware
             redirect($rule['login_redirect']);
         }
 
+        $CI->load->model('User_model');
+        $user = $CI->User_model->findById((int) $CI->auth->id());
+
+        if (!$user || $user->status !== 'active') {
+            $CI->auth->logout();
+            $CI->session->set_flashdata('error', 'Your account is no longer active.');
+            redirect($rule['login_redirect']);
+        }
+
         $expectedRole = $rule['role'];
         $actualRole = $CI->auth->role();
 
