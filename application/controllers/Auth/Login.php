@@ -56,7 +56,7 @@ class Login extends MY_Controller
             return redirect('admin/dashboard');
         }
 
-        return redirect('user/products');
+        return redirect('');
     }
 
     /**

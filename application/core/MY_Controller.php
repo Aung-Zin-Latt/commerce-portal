@@ -14,6 +14,34 @@ class MY_Controller extends CI_Controller
         $this->load->view('layouts/app_layout', $data);
     }
 
+    protected function render_store($content, $data = array())
+    {
+        $cartService = $this->loadService('Cart_service');
+
+        $data['cart_item_count'] = $cartService->getItemCount();
+        $data['content'] = $content;
+        $this->load->view('layouts/store_layout', $data);
+    }
+
+    /**
+     * Load a service class once per request.
+     *
+     * CI's load->file() always re-includes the file, which causes
+     * "Cannot declare class ... already in use" fatals when multiple
+     * services depend on each other.
+     *
+     * @param string $service
+     * @return object
+     */
+    protected function loadService($service)
+    {
+        if (!class_exists($service, false)) {
+            require_once APPPATH . 'services/' . $service . '.php';
+        }
+
+        return new $service();
+    }
+
     protected function render_auth($content, $data = array())
     {
         $data['content'] = $content;
@@ -44,7 +72,7 @@ class MY_Controller extends CI_Controller
 
         if (!$this->auth->isAdmin()) {
             $this->session->set_flashdata('error', 'You do not have permission to access the admin panel.');
-            redirect('user/products');
+            redirect('');
         }
     }
 
@@ -108,7 +136,7 @@ class MY_Controller extends CI_Controller
         }
 
         if ($this->auth->isCustomer()) {
-            redirect('user/products');
+            redirect('');
         }
 
         $this->session->set_flashdata('error', 'Your account role is not allowed.');

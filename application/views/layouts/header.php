@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="<?= base_url('assets/adminlte/css/adminlte.min.css'); ?>">
 
     <!-- Application CSS -->
-    <link rel="stylesheet" href="<?= base_url('assets/css/app.css'); ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/css/app.css?v=3'); ?>">
 
     <?php if (!empty($styles)): ?>
         <?php foreach ($styles as $style): ?>

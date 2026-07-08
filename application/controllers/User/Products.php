@@ -3,16 +3,27 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Products extends MY_Controller
 {
+    /** @var Product_service */
+    protected $productService;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->productService = $this->loadService('Product_service');
+    }
+
     public function index()
     {
-        $this->render('user/placeholder', array(
-            'title' => 'Products',
-            'page_heading' => 'Products',
-            'page_description' => 'User products page is ready for implementation.',
-            'breadcrumbs' => array(
-                'Home' => '',
-                'Products' => NULL,
-            ),
+        redirect('');
+    }
+
+    public function show($id)
+    {
+        $product = $this->productService->getActiveProductOrFail((int) $id);
+
+        $this->render_store('user/products/show', array(
+            'title' => $product->name,
+            'product' => $product,
         ));
     }
 }

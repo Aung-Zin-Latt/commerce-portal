@@ -10,8 +10,7 @@ class Products extends MY_Controller
     {
         parent::__construct();
         $this->load->helper('form');
-        $this->load->file(APPPATH . 'services/Product_service.php', TRUE);
-        $this->productService = new Product_service();
+        $this->productService = $this->loadService('Product_service');
     }
 
     public function index()

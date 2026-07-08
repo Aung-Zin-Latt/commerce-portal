@@ -27,6 +27,24 @@ class Product_service
         );
     }
 
+    public function listActiveProducts(array $filters = array(), int $page = 1, int $perPage = 12)
+    {
+        $filters['status'] = 'active';
+
+        return $this->listProducts($filters, $page, $perPage);
+    }
+
+    public function getActiveProductOrFail(int $id)
+    {
+        $product = $this->getProductOrFail($id);
+
+        if ($product->status !== 'active') {
+            show_404();
+        }
+
+        return $product;
+    }
+
     public function getProductOrFail(int $id)
     {
         $product = $this->CI->Product_model->findById($id);

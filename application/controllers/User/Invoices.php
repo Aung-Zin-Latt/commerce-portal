@@ -10,16 +10,12 @@ class Invoices extends MY_Controller
 
         $invoices = $this->Invoice_model->getAllForUser((int) $this->auth->id());
 
-        $this->render('user/placeholder', array(
+        $this->render_store('user/store/placeholder', array(
             'title' => 'Invoices',
             'page_heading' => 'Invoices',
             'page_description' => empty($invoices)
                 ? 'No invoices yet. Completed purchases will appear here.'
-                : 'You have ' . count($invoices) . ' invoice(s). Open one with /user/invoices/show/{id}.',
-            'breadcrumbs' => array(
-                'Home' => '',
-                'Invoices' => NULL,
-            ),
+                : 'You have ' . count($invoices) . ' invoice(s).',
         ));
     }
 
@@ -44,14 +40,10 @@ class Invoices extends MY_Controller
             return;
         }
 
-        $this->render('user/placeholder', array(
+        $this->render_store('user/store/placeholder', array(
             'title' => 'Invoice ' . $invoice->invoice_number,
             'page_heading' => 'Invoice ' . html_escape($invoice->invoice_number),
             'page_description' => 'Total: ' . html_escape($invoice->currency) . ' ' . html_escape($invoice->total_amount),
-            'breadcrumbs' => array(
-                'Home' => 'user/invoices',
-                'Invoice Details' => NULL,
-            ),
         ));
     }
 }

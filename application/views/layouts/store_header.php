@@ -6,12 +6,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title><?= isset($title) ? $title . ' | Commerce Portal' : 'Commerce Portal'; ?></title>
+    <title><?= isset($title) ? html_escape($title) . ' | Commerce Portal' : 'Commerce Portal'; ?></title>
 
     <link rel="stylesheet" href="<?= base_url('assets/bootstrap/css/bootstrap.min.css'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets/fontawesome/css/all.min.css'); ?>">
     <link rel="stylesheet" href="<?= base_url('assets/adminlte/css/adminlte.min.css'); ?>">
-    <link rel="stylesheet" href="<?= base_url('assets/css/app.css?v=3'); ?>">
+    <link rel="stylesheet" href="<?= base_url('assets/css/app.css?v=8'); ?>">
 
     <?php if (!empty($styles)): ?>
         <?php foreach ($styles as $style): ?>
@@ -20,4 +20,4 @@
     <?php endif; ?>
 </head>
 
-<body class="login-page bg-body-secondary">
+<body class="store-page bg-body-tertiary">

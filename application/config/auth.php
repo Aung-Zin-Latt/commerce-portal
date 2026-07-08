@@ -33,7 +33,7 @@ $config['auth_middleware'] = array(
         'type'             => 'session',
         'role'             => 'admin',
         'login_redirect'   => 'login',
-        'denied_redirect'  => 'user/products',
+        'denied_redirect'  => '',
         'login_message'    => 'Please log in first.',
         'denied_message'   => 'You do not have permission to access the admin panel.',
     ),

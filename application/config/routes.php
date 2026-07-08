@@ -55,6 +55,35 @@ $route['admin/products/delete/(:num)'] = 'Admin/Products/delete/$1';
 
 /*
 |--------------------------------------------------------------------------
+| Customer Store Routes
+|--------------------------------------------------------------------------
+*/
+$route['user/products'] = 'User/Products/index';
+$route['user/products/(:num)'] = 'User/Products/show/$1';
+$route['user/cart'] = 'User/Cart/index';
+$route['user/checkout'] = 'User/Checkout/index';
+$route['user/checkout/place'] = 'User/Checkout/place';
+$route['user/checkout/confirmation/(:num)'] = 'User/Checkout/confirmation/$1';
+$route['user/purchase'] = 'User/Purchase/index';
+$route['user/purchase/show/(:num)'] = 'User/Purchase/show/$1';
+$route['user/invoices'] = 'User/Invoices/index';
+$route['user/invoices/show/(:num)'] = 'User/Invoices/show/$1';
+$route['user/receipts'] = 'User/Receipts/index';
+$route['user/receipts/show/(:num)'] = 'User/Receipts/show/$1';
+
+/*
+|--------------------------------------------------------------------------
+| Shopping Cart Routes
+|--------------------------------------------------------------------------
+*/
+$route['user/cart/add'] = 'User/Cart/add';
+$route['user/cart/update'] = 'User/Cart/update';
+$route['user/cart/increase/(:num)'] = 'User/Cart/increase/$1';
+$route['user/cart/decrease/(:num)'] = 'User/Cart/decrease/$1';
+$route['user/cart/remove/(:num)'] = 'User/Cart/remove/$1';
+
+/*
+|--------------------------------------------------------------------------
 | Reserved Routes
 |--------------------------------------------------------------------------
 */

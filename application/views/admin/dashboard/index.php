@@ -1,5 +1,5 @@
-<div class="row">
-    <div class="col-md-3">
+<div class="row g-3">
+    <div class="col-6 col-md-3">
         <div class="card">
             <div class="card-body">
                 <h5>Total Users</h5>
@@ -7,7 +7,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-6 col-md-3">
         <div class="card">
             <div class="card-body">
                 <h5>Active Users</h5>
@@ -15,7 +15,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-6 col-md-3">
         <div class="card">
             <div class="card-body">
                 <h5>Total Products</h5>
@@ -23,7 +23,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-6 col-md-3">
         <div class="card">
             <div class="card-body">
                 <h5>Active Products</h5>

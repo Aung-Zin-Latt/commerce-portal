@@ -10,16 +10,12 @@ class Receipts extends MY_Controller
 
         $receipts = $this->Receipt_model->getAllForUser((int) $this->auth->id());
 
-        $this->render('user/placeholder', array(
+        $this->render_store('user/store/placeholder', array(
             'title' => 'Receipts',
             'page_heading' => 'Receipts',
             'page_description' => empty($receipts)
                 ? 'No receipts yet. Completed purchases will appear here.'
-                : 'You have ' . count($receipts) . ' receipt(s). Open one with /user/receipts/show/{id}.',
-            'breadcrumbs' => array(
-                'Home' => '',
-                'Receipts' => NULL,
-            ),
+                : 'You have ' . count($receipts) . ' receipt(s).',
         ));
     }
 
@@ -44,14 +40,10 @@ class Receipts extends MY_Controller
             return;
         }
 
-        $this->render('user/placeholder', array(
+        $this->render_store('user/store/placeholder', array(
             'title' => 'Receipt ' . $receipt->receipt_number,
             'page_heading' => 'Receipt ' . html_escape($receipt->receipt_number),
             'page_description' => 'Amount: ' . html_escape($receipt->currency) . ' ' . html_escape($receipt->amount),
-            'breadcrumbs' => array(
-                'Home' => 'user/receipts',
-                'Receipt Details' => NULL,
-            ),
         ));
     }
 }

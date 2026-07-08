@@ -5,7 +5,7 @@
 <script src="<?= base_url('assets/adminlte/js/adminlte.min.js'); ?>"></script>
 
 <!-- Application JS -->
-<script src="<?= base_url('assets/js/app.js?v=2'); ?>"></script>
+<script src="<?= base_url('assets/js/app.js?v=3'); ?>"></script>
 
 <?php if (!empty($scripts)): ?>
     <?php foreach ($scripts as $script): ?>

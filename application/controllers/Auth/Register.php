@@ -62,7 +62,7 @@ class Register extends MY_Controller
         $user = $this->User_model->findById($userId);
         $this->auth->login($user);
 
-        return redirect('user/products');
+        return redirect('');
     }
 
     protected function redirectByRole()
@@ -71,6 +71,6 @@ class Register extends MY_Controller
             return redirect('admin/dashboard');
         }
 
-        return redirect('user/products');
+        return redirect('');
     }
 }
