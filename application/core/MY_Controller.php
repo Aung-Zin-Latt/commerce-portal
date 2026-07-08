@@ -7,4 +7,119 @@ class MY_Controller extends CI_Controller
     {
         parent::__construct();
     }
+
+    protected function render($content, $data = array())
+    {
+        $data['content'] = $content;
+        $this->load->view('layouts/app_layout', $data);
+    }
+
+    protected function render_auth($content, $data = array())
+    {
+        $data['content'] = $content;
+        $this->load->view('layouts/auth_layout', $data);
+    }
+
+    /**
+     * Ensure the current user is logged in.
+     * Route-level auth is normally handled by Auth_middleware.
+     */
+    protected function require_auth()
+    {
+        $this->load->library('auth');
+
+        if (!$this->auth->check()) {
+            $this->session->set_flashdata('error', 'Please log in first.');
+            redirect('login');
+        }
+    }
+
+    /**
+     * Ensure the current user is an admin.
+     * Prefer central middleware rules in application/config/auth.php.
+     */
+    protected function require_admin()
+    {
+        $this->require_auth();
+
+        if (!$this->auth->isAdmin()) {
+            $this->session->set_flashdata('error', 'You do not have permission to access the admin panel.');
+            redirect('user/products');
+        }
+    }
+
+    /**
+     * Ensure the current user is a customer.
+     * Prefer central middleware rules in application/config/auth.php.
+     */
+    protected function require_customer()
+    {
+        $this->require_auth();
+
+        if (!$this->auth->isCustomer()) {
+            $this->session->set_flashdata('error', 'You do not have permission to access that page.');
+            redirect('admin/users');
+        }
+    }
+
+    /**
+     * Ownership authorization.
+     *
+     * Use this after loading a resource to ensure it belongs to the
+     * currently authenticated user. Admins may access any resource.
+     *
+     * @param int $resourceUserId
+     * @return void
+     */
+    protected function require_owner($resourceUserId)
+    {
+        $this->load->library('auth');
+
+        if ($this->auth->isAdmin()) {
+            return;
+        }
+
+        if ((int) $resourceUserId !== (int) $this->auth->id()) {
+            $this->deny_resource_access();
+        }
+    }
+
+    /**
+     * Return 404 for unauthorized or missing resources.
+     *
+     * We intentionally do not reveal whether a record exists when the
+     * current user does not own it.
+     */
+    protected function deny_resource_access()
+    {
+        show_404();
+    }
+
+    protected function redirect_by_role()
+    {
+        $this->load->library('auth');
+
+        if (!$this->auth->check()) {
+            redirect('login');
+        }
+
+        if ($this->auth->isAdmin()) {
+            redirect('admin/users');
+        }
+
+        if ($this->auth->isCustomer()) {
+            redirect('user/products');
+        }
+
+        $this->session->set_flashdata('error', 'Your account role is not allowed.');
+        redirect('login');
+    }
+
+    protected function redirect_with_validation_errors($redirectUrl)
+    {
+        $this->session->set_flashdata('field_errors', $this->form_validation->error_array());
+        $this->session->set_flashdata('old_input', $this->input->post(NULL, TRUE) ?: array());
+
+        return redirect($redirectUrl);
+    }
 }

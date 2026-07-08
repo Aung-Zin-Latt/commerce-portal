@@ -10,7 +10,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | Users are redirected here when visiting the root URL.
 |
 */
-$route['default_controller'] = 'Auth/Login';
+$route['default_controller'] = 'Home';
 
 /*
 |--------------------------------------------------------------------------
@@ -20,8 +20,13 @@ $route['default_controller'] = 'Auth/Login';
 | Friendly authentication URLs.
 |
 */
-$route['login']  = 'Auth/Login';
+$route['login'] = 'Auth/Login';
+$route['login/authenticate'] = 'Auth/Login/authenticate';
 $route['logout'] = 'Auth/Login/logout';
+$route['register'] = 'Auth/Register';
+$route['register/store'] = 'Auth/Register/store';
+
+$route['test'] = 'test/bootstrap';
 
 /*
 |--------------------------------------------------------------------------
