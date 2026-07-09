@@ -405,7 +405,41 @@ class Payment_service
 
         $this->CI->db->trans_complete();
 
-        return (bool) $this->CI->db->trans_status();
+        $ok = (bool) $this->CI->db->trans_status();
+
+        if ($ok) {
+            $this->sendReceiptEmailAfterPayment($paymentId, $order);
+        }
+
+        return $ok;
+    }
+
+    // Receipt email sending
+    protected function sendReceiptEmailAfterPayment(int $paymentId, $order)
+    {
+        $this->CI->load->model('Receipt_model');
+
+        $receipt = $this->CI->Receipt_model->findByPaymentId($paymentId);
+        $user = $this->CI->db
+            ->where('id', (int) $order->user_id)
+            ->get('users')
+            ->row();
+
+        if (!$receipt || !$user) {
+            log_message('error', 'Receipt email skipped: missing receipt or user for payment #' . $paymentId);
+            return;
+        }
+
+        if (!class_exists('Email_service', FALSE)) {
+            require_once APPPATH . 'services/Email_service.php';
+        }
+
+        $emailService = new Email_service();
+        $result = $emailService->sendReceiptEmail($receipt, $order, $user);
+
+        if (!$result['success']) {
+            log_message('error', 'Receipt email not sent for payment #' . $paymentId . ': ' . $result['message']);
+        }
     }
 
     protected function resolveStripePaymentIntentId($paymentIntent)

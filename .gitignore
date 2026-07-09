@@ -17,3 +17,7 @@ application/cache/*
 # IDE
 .vscode/
 .idea/
+
+#PDF
+writable/tmp/*
+!writable/tmp/.gitkeep
