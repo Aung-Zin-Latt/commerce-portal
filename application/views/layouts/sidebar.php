@@ -1,5 +1,6 @@
 <?php
 $current_uri = uri_string();
+$is_stripe = (strpos($current_uri, 'admin/stripe-transactions') === 0);
 $is_dashboard = ($current_uri === 'admin/dashboard' || $current_uri === 'admin');
 $is_users = (strpos($current_uri, 'admin/users') === 0);
 $is_products = (strpos($current_uri, 'admin/products') === 0);
@@ -31,6 +32,12 @@ $is_products = (strpos($current_uri, 'admin/products') === 0);
                     <a href="<?= site_url('admin/products'); ?>" class="nav-link<?= $is_products ? ' active' : ''; ?>">
                         <i class="nav-icon fas fa-box"></i>
                         <p>Products</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="<?= site_url('admin/stripe-transactions'); ?>" class="nav-link<?= $is_stripe ? ' active' : ''; ?>">
+                        <i class="nav-icon fas fa-credit-card"></i>
+                        <p>Stripe Transactions</p>
                     </a>
                 </li>
             </ul>

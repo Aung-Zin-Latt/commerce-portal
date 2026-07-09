@@ -9,12 +9,16 @@ class Checkout extends MY_Controller
     /** @var Order_service */
     protected $orderService;
 
+    /** @var Payment_service */
+    protected $paymentService;
+
     public function __construct()
     {
         parent::__construct();
         $this->load->library('auth');
         $this->cartService = $this->loadService('Cart_service');
         $this->orderService = $this->loadService('Order_service');
+        $this->paymentService = $this->loadService('Payment_service');
     }
 
     public function index()
@@ -56,5 +60,29 @@ class Checkout extends MY_Controller
             'order' => $data['order'],
             'items' => $data['items'],
         ));
+    }
+
+    // Stripe
+    public function pay($orderId)
+    {
+        if ($this->input->method() !== 'post') {
+            show_404();
+        }
+        $data = $this->orderService->getOrderWithItemsForUserOrFail(
+            (int) $orderId,
+            (int) $this->auth->id()
+        );
+        $result = $this->paymentService->createCheckoutSession(
+            $data['order'],
+            $data['items'],
+            (int) $this->auth->id(),
+            (string) $this->session->userdata('user_email')
+        );
+        if (!$result['success']) {
+            $this->session->set_flashdata('error', $result['message']);
+            redirect('user/purchase/show/' . (int) $orderId);
+        }
+        
+        redirect($result['redirect_url']);
     }
 }

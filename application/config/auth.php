@@ -15,6 +15,7 @@ $config['auth_public_controllers'] = array('home', 'test');
 $config['auth_public_directories'] = array(
     'auth/',
     'cli/',
+    'webhooks/',
 );
 
 /*

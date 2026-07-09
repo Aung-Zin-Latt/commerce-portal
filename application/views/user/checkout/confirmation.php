@@ -137,9 +137,11 @@ $status = isset($status_labels[$order->status])
 
                 <?php if ($order->status === 'pending'): ?>
                     <div class="d-grid gap-2 mb-2">
-                        <button type="button" class="btn-stripe" disabled>
-                            Pay <?= html_escape($order->currency); ?> <?= html_escape(number_format((float) $order->total_amount, 2)); ?>
-                        </button>
+                        <?= form_open('user/checkout/pay/' . (int) $order->id); ?>
+                            <button type="submit" class="btn-stripe">
+                                Pay <?= html_escape($order->currency); ?> <?= html_escape(number_format((float) $order->total_amount, 2)); ?>
+                            </button>
+                        <?= form_close(); ?>
                     </div>
                     <p class="btn-stripe-note mb-4 mb-lg-0">
                         Secure payment powered by <span class="btn-stripe-wordmark">stripe</span>

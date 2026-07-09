@@ -53,6 +53,8 @@ $route['admin/products/edit/(:num)'] = 'Admin/Products/edit/$1';
 $route['admin/products/update/(:num)'] = 'Admin/Products/update/$1';
 $route['admin/products/delete/(:num)'] = 'Admin/Products/delete/$1';
 
+$route['admin/stripe-transactions'] = 'Admin/StripeTransactions/index';
+
 /*
 |--------------------------------------------------------------------------
 | Customer Store Routes
@@ -81,6 +83,14 @@ $route['user/cart/update'] = 'User/Cart/update';
 $route['user/cart/increase/(:num)'] = 'User/Cart/increase/$1';
 $route['user/cart/decrease/(:num)'] = 'User/Cart/decrease/$1';
 $route['user/cart/remove/(:num)'] = 'User/Cart/remove/$1';
+
+/*
+|--------------------------------------------------------------------------
+| Stripe Routes
+|--------------------------------------------------------------------------
+*/
+$route['user/checkout/pay/(:num)'] = 'User/Checkout/pay/$1';
+$route['webhooks/stripe'] = 'Webhooks/Stripe/index';
 
 /*
 |--------------------------------------------------------------------------

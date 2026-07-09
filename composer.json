@@ -5,5 +5,7 @@
     "license": "proprietary",
     "minimum-stability": "stable",
     "prefer-stable": true,
-    "require": {}
+    "require": {
+        "stripe/stripe-php": "^20.3"
+    }
 }

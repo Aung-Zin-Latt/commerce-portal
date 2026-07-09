@@ -64,8 +64,10 @@ foreach ($lines as $line)
 		$value = substr($value, 1, -1);
 	}
 
-	// Do not overwrite variables already supplied by the OS/container.
-	if (getenv($name) !== FALSE)
+	// Do not overwrite non-empty variables already supplied by the OS/container.
+	// Empty container values (e.g. from an old .env) may be replaced by the file.
+	$existing = getenv($name);
+	if ($existing !== FALSE && $existing !== '')
 	{
 		continue;
 	}

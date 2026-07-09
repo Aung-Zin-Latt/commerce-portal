@@ -5,12 +5,14 @@ class StripeTransactions extends MY_Controller
 {
     public function index()
     {
-        $this->render('admin/placeholder', array(
+        $this->load->model('Stripe_transaction_model');
+        $transactions = $this->Stripe_transaction_model->getAllWithPayments();
+
+        $this->render('admin/stripe_transactions/index', array(
             'title' => 'Stripe Transactions',
-            'page_heading' => 'Stripe Transactions',
-            'page_description' => 'Admin Stripe transactions page is ready for implementation.',
+            'transactions' => $transactions,
             'breadcrumbs' => array(
-                'Home' => '',
+                'Home' => 'admin/dashboard',
                 'Stripe Transactions' => NULL,
             ),
         ));

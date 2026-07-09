@@ -29,5 +29,11 @@ class Order_model extends CI_Model
 
         return (int) $this->db->insert_id();
     }
+
+    // Stripe
+    public function updateById(int $id, array $data)
+    {
+        return $this->db->where('id', $id)->update($this->table, $data);
+    }
     
 }
