@@ -9,8 +9,7 @@ class Dashboard extends MY_Controller
     public function __construct()
     {
         parent::__construct();
-        $this->load->file(APPPATH . 'services/Dashboard_service.php', TRUE);
-        $this->dashboardService = new Dashboard_service();
+        $this->dashboardService = $this->loadService('Dashboard_service');
     }
 
     public function index()

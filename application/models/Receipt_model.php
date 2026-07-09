@@ -60,4 +60,23 @@ class Receipt_model extends CI_Model
             ->get($this->table)
             ->row();
     }
+
+    // Admin Receipt List
+    public function getAllReceiptsWithCustomer()
+    {
+        return $this->db
+            ->select('receipts.*, users.name AS customer_name, users.email AS customer_email, orders.order_number')
+            ->from($this->table)
+            ->join('users', 'users.id = receipts.user_id')
+            ->join('orders', 'orders.id = receipts.order_id')
+            ->order_by('receipts.issued_at', 'DESC')
+            ->get()
+            ->result();
+    }
+
+    // Receipt count/sum helpers
+    public function countAll()
+    {
+        return (int) $this->db->count_all($this->table);
+    }
 }

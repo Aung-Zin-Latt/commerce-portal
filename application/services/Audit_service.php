@@ -27,5 +27,9 @@ class Audit_service
             'created_at' => $now,
         ));
     }
-    
+
+    public function listAllLogs()
+    {
+        return $this->CI->Audit_log_model->getAllWithUser();
+    }
 }

@@ -137,5 +137,21 @@ class Invoice_service
         );
     }
 
-
+    // Admin Invoice List read helper
+    public function listAllInvoices()
+    {
+        return $this->CI->Invoice_model->getAllInvoicesWithCustomer();
+    }
+    public function getInvoiceWithItemsOrFail(int $invoiceId)
+    {
+        $invoice = $this->CI->Invoice_model->findById($invoiceId);
+        if (!$invoice) {
+            show_404();
+        }
+        $items = $this->CI->Invoice_item_model->getByInvoiceId($invoiceId);
+        return array(
+            'invoice' => $invoice,
+            'items' => $items,
+        );
+    }
 }

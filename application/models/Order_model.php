@@ -35,5 +35,57 @@ class Order_model extends CI_Model
     {
         return $this->db->where('id', $id)->update($this->table, $data);
     }
+
+    // Admin Order List
+    public function findById(int $orderId)
+    {
+        return $this->db
+            ->where('id', $orderId)
+            ->get($this->table)
+            ->row();
+    }
+    public function getAllOrdersWithCustomer()
+    {
+        return $this->db
+            ->select('orders.*, users.name AS customer_name, users.email AS customer_email')
+            ->from($this->table)
+            ->join('users', 'users.id = orders.user_id')
+            ->order_by('orders.created_at', 'DESC')
+            ->get()
+            ->result();
+    }
+
+    // Order count/sum helpers
+    public function countAll()
+    {
+        return (int) $this->db->count_all($this->table);
+    }
+    public function countByStatus(string $status)
+    {
+        return (int) $this->db
+            ->where('status', $status)
+            ->count_all_results($this->table);
+    }
+    public function sumPaidRevenue()
+    {
+        $row = $this->db
+            ->select_sum('total_amount', 'revenue')
+            ->where('status', 'paid')
+            ->get($this->table)
+            ->row();
+
+        return $row && $row->revenue !== NULL ? (float) $row->revenue : 0.0;
+    }
+    public function getRecentWithCustomer(int $limit = 5)
+    {
+        return $this->db
+            ->select('orders.*, users.name AS customer_name, users.email AS customer_email')
+            ->from($this->table)
+            ->join('users', 'users.id = orders.user_id')
+            ->order_by('orders.created_at', 'DESC')
+            ->limit($limit)
+            ->get()
+            ->result();
+    }
     
 }
