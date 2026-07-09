@@ -36,6 +36,11 @@ class Auth_middleware
                 $this->enforceSessionRole($CI, $rule);
                 return;
             }
+
+            if ($rule['type'] === 'bearer') {
+                $this->enforceBearerToken($CI, $rule);
+                return;
+            }
         }
     }
 
@@ -88,5 +93,77 @@ class Auth_middleware
             $CI->session->set_flashdata('error', $rule['denied_message']);
             redirect($rule['denied_redirect']);
         }
+    }
+
+    protected function enforceBearerToken($CI, array $rule)
+    {
+        $CI->load->helper('api');
+        $CI->load->library('auth');
+
+        $controller = strtolower((string) $CI->router->class);
+        $method = strtolower((string) $CI->router->method);
+        $routeKey = $controller . '/' . $method;
+
+        $except = isset($rule['except']) && is_array($rule['except']) ? $rule['except'] : array();
+
+        if (in_array($routeKey, $except, TRUE)) {
+            return;
+        }
+
+        $header = $this->getAuthorizationHeader($CI);
+        $token = $this->extractBearerToken($header);
+
+        if ($token === NULL) {
+            json_error('Unauthorized.', 401);
+            $CI->output->_display();
+            exit;
+        }
+
+        if (!class_exists('Api_token_service', FALSE)) {
+            require_once APPPATH . 'services/Api_token_service.php';
+        }
+
+        $tokenService = new Api_token_service();
+        $user = $tokenService->authenticateBearer($token);
+
+        if (!$user) {
+            json_error('Unauthorized.', 401);
+            $CI->output->_display();
+            exit;
+        }
+
+        $CI->auth->setApiUser($user);
+    }
+
+    protected function getAuthorizationHeader($CI)
+    {
+        $header = $CI->input->get_request_header('Authorization', TRUE);
+
+        if (!empty($header)) {
+            return $header;
+        }
+
+        if (isset($_SERVER['HTTP_AUTHORIZATION'])) {
+            return $_SERVER['HTTP_AUTHORIZATION'];
+        }
+
+        if (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
+            return $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
+        }
+
+        return '';
+    }
+
+    protected function extractBearerToken($header)
+    {
+        if (!is_string($header) || $header === '') {
+            return NULL;
+        }
+
+        if (preg_match('/^Bearer\s+(\S+)$/i', trim($header), $matches)) {
+            return $matches[1];
+        }
+
+        return NULL;
     }
 }

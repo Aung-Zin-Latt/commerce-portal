@@ -151,3 +151,34 @@ class MY_Controller extends CI_Controller
         return redirect($redirectUrl);
     }
 }
+
+/**
+ * Base controller for JSON API endpoints.
+ *
+ * Defined in this file because CI3 only auto-loads MY_Controller.php
+ * before parsing application controllers.
+ */
+class MY_Api_Controller extends CI_Controller
+{
+    public function __construct()
+    {
+        parent::__construct();
+        $this->load->helper('api');
+        $this->load->library('auth');
+    }
+
+    /**
+     * Load a service class once per request.
+     *
+     * @param string $service
+     * @return object
+     */
+    protected function loadService($service)
+    {
+        if (!class_exists($service, FALSE)) {
+            require_once APPPATH . 'services/' . $service . '.php';
+        }
+
+        return new $service();
+    }
+}

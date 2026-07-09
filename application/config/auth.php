@@ -46,4 +46,8 @@ $config['auth_middleware'] = array(
         'login_message'    => 'Please log in first.',
         'denied_message'   => 'You do not have permission to access that page.',
     ),
+    'api/' => array(
+        'type'   => 'bearer',
+        'except' => array('login/index'),
+    ),
 );

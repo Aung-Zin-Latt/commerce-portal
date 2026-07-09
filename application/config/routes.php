@@ -115,3 +115,14 @@ $route['webhooks/stripe'] = 'Webhooks/Stripe/index';
 */
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
+
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+*/
+$route['api/v1/login'] = 'Api/V1/Login/index';
+$route['api/v1/invoices'] = 'Api/V1/Invoices/index';
+$route['api/v1/receipts'] = 'Api/V1/Receipts/index';
+$route['api/v1/invoices/(:num)'] = 'Api/V1/Invoices/show/$1';
+$route['api/v1/receipts/(:num)'] = 'Api/V1/Receipts/show/$1';

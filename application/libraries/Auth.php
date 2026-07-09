@@ -5,6 +5,9 @@ class Auth
 {
     protected $CI;
 
+    /** @var object|null In-memory identity for bearer-token API requests. */
+    protected $apiUser = NULL;
+
     public function __construct()
     {
         $this->CI =& get_instance();
@@ -21,8 +24,21 @@ class Auth
         ));
     }
 
+    /**
+     * Set the authenticated user for an API request (no session cookie).
+     *
+     * @param object $user
+     * @return void
+     */
+    public function setApiUser($user)
+    {
+        $this->apiUser = $user;
+    }
+
     public function logout()
     {
+        $this->apiUser = NULL;
+
         $this->CI->session->unset_userdata(array(
             'user_id',
             'user_name',
@@ -35,16 +51,28 @@ class Auth
 
     public function check()
     {
+        if ($this->apiUser) {
+            return TRUE;
+        }
+
         return (bool) $this->CI->session->userdata('logged_in');
     }
 
     public function id()
     {
+        if ($this->apiUser) {
+            return (int) $this->apiUser->id;
+        }
+
         return $this->CI->session->userdata('user_id');
     }
 
     public function role()
     {
+        if ($this->apiUser) {
+            return $this->apiUser->role_name;
+        }
+
         return $this->CI->session->userdata('role_name');
     }
 

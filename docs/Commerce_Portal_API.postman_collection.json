@@ -1,0 +1,299 @@
+{
+	"info": {
+		"_postman_id": "a8c3e2f1-4b7d-4e9a-9c1f-commerce-portal-api",
+		"name": "Commerce Portal API",
+		"description": "REST API v1 for Commerce Portal.\n\n**How to use**\n1. Import this collection into Postman.\n2. Set `base_url` if needed (default: `http://localhost:8080`).\n3. Run **Auth → Login** first — the bearer token is saved to the collection variable `token` automatically.\n4. All other requests inherit `Authorization: Bearer {{token}}`.\n\n**Seed credentials**\n- Email: `customer@example.com`\n- Password: `password123`",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{token}}",
+				"type": "string"
+			}
+		]
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8080"
+		},
+		{
+			"key": "email",
+			"value": "customer@example.com"
+		},
+		{
+			"key": "password",
+			"value": "password123"
+		},
+		{
+			"key": "token",
+			"value": ""
+		},
+		{
+			"key": "invoice_id",
+			"value": "1"
+		},
+		{
+			"key": "receipt_id",
+			"value": "1"
+		}
+	],
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Login returns 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const json = pm.response.json();",
+									"",
+									"if (json && json.success && json.data && json.data.token) {",
+									"    pm.collectionVariables.set('token', json.data.token);",
+									"    console.log('Bearer token saved to collection variable: token');",
+									"}",
+									"",
+									"pm.test('Response includes bearer token', function () {",
+									"    pm.expect(json).to.have.property('success', true);",
+									"    pm.expect(json.data).to.have.property('token');",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/x-www-form-urlencoded"
+							}
+						],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "email",
+									"value": "{{email}}",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "{{password}}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"login"
+							]
+						},
+						"description": "Exchange email/password for a bearer token.\n\nOn success, the Tests script stores `data.token` in the collection variable `token`, which is used automatically by all other requests."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Invoices",
+			"item": [
+				{
+					"name": "List Invoices",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('List invoices returns 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const json = pm.response.json();",
+									"",
+									"if (json && json.success && Array.isArray(json.data) && json.data.length > 0) {",
+									"    pm.collectionVariables.set('invoice_id', String(json.data[0].id));",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/invoices",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"invoices"
+							]
+						},
+						"description": "List invoices for the authenticated user.\n\nUses collection auth: `Authorization: Bearer {{token}}`.\n\nAlso saves the first invoice id into `invoice_id` for the show request."
+					},
+					"response": []
+				},
+				{
+					"name": "Show Invoice",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Show invoice returns 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/invoices/{{invoice_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"invoices",
+								"{{invoice_id}}"
+							]
+						},
+						"description": "Get one invoice (with line items) owned by the authenticated user.\n\nUses `{{invoice_id}}` — auto-filled after **List Invoices**, or set manually."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Receipts",
+			"item": [
+				{
+					"name": "List Receipts",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('List receipts returns 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const json = pm.response.json();",
+									"",
+									"if (json && json.success && Array.isArray(json.data) && json.data.length > 0) {",
+									"    pm.collectionVariables.set('receipt_id', String(json.data[0].id));",
+									"}"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/receipts",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"receipts"
+							]
+						},
+						"description": "List receipts for the authenticated user.\n\nUses collection auth: `Authorization: Bearer {{token}}`.\n\nAlso saves the first receipt id into `receipt_id` for the show request."
+					},
+					"response": []
+				},
+				{
+					"name": "Show Receipt",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"exec": [
+									"pm.test('Show receipt returns 200', function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								]
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/receipts/{{receipt_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"receipts",
+								"{{receipt_id}}"
+							]
+						},
+						"description": "Get one receipt owned by the authenticated user.\n\nUses `{{receipt_id}}` — auto-filled after **List Receipts**, or set manually."
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
