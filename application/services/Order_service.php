@@ -164,4 +164,25 @@ class Order_service
 
         return $prefix . str_pad((string) $next, 4, '0', STR_PAD_LEFT);
     }
+
+    // Admin Order List read helper
+    public function listAllOrders()
+    {
+        return $this->CI->Order_model->getAllOrdersWithCustomer();
+    }
+    public function getOrderWithItemsOrFail(int $orderId)
+    {
+        $order = $this->CI->Order_model->findById($orderId);
+
+        if (!$order) {
+            show_404();
+        }
+
+        $items = $this->CI->Order_item_model->getByOrderId($orderId);
+
+        return array(
+            'order' => $order,
+            'items' => $items,
+        );
+    }
 }

@@ -64,4 +64,23 @@ class Invoice_model extends CI_Model
             ->get($this->table)
             ->row();
     }
+
+    // Admin Invoice List
+    public function getAllInvoicesWithCustomer()
+    {
+        return $this->db
+            ->select('invoices.*, users.name AS customer_name, users.email AS customer_email, orders.order_number')
+            ->from($this->table)
+            ->join('users', 'users.id = invoices.user_id')
+            ->join('orders', 'orders.id = invoices.order_id')
+            ->order_by('invoices.issued_at', 'DESC')
+            ->get()
+            ->result();
+    }
+
+    // Invoice count/sum helpers
+    public function countAll()
+    {
+        return (int) $this->db->count_all($this->table);
+    }
 }

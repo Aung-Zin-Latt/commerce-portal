@@ -53,7 +53,22 @@ $route['admin/products/edit/(:num)'] = 'Admin/Products/edit/$1';
 $route['admin/products/update/(:num)'] = 'Admin/Products/update/$1';
 $route['admin/products/delete/(:num)'] = 'Admin/Products/delete/$1';
 
+// Invoices
+$route['admin/invoices'] = 'Admin/Invoices/index';
+$route['admin/invoices/show/(:num)'] = 'Admin/Invoices/show/$1';
+
+// Receipts
+$route['admin/receipts'] = 'Admin/Receipts/index';
+$route['admin/receipts/show/(:num)'] = 'Admin/Receipts/show/$1';
+
+// Orders
+$route['admin/orders'] = 'Admin/Orders/index';
+$route['admin/orders/show/(:num)'] = 'Admin/Orders/show/$1';
+
 $route['admin/stripe-transactions'] = 'Admin/StripeTransactions/index';
+
+// Audit Logs
+$route['admin/audit-logs'] = 'Admin/AuditLogs/index';
 
 /*
 |--------------------------------------------------------------------------

@@ -96,5 +96,21 @@ class Receipt_service
             show_404();
         }
         return $receipt;
-    } 
+    }
+
+    // Admin Receipt List read helper
+    public function listAllReceipts()
+    {
+        return $this->CI->Receipt_model->getAllReceiptsWithCustomer();
+    }
+    public function getReceiptOrFail(int $receiptId)
+    {
+        $receipt = $this->CI->Receipt_model->findById($receiptId);
+
+        if (!$receipt) {
+            show_404();
+        }
+
+        return $receipt;
+    }
 }
