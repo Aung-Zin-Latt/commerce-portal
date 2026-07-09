@@ -1,6 +1,8 @@
 <?php
 $order = isset($order) ? $order : null;
 $items = isset($items) ? $items : array();
+$invoice = isset($invoice) ? $invoice : null;
+$receipt = isset($receipt) ? $receipt : null;
 
 if (!$order) {
     return;
@@ -180,6 +182,16 @@ $status = isset($status_labels[$order->status])
                 <?php endif; ?>
 
                 <div class="d-grid gap-2">
+                    <?php if (!empty($invoice)): ?>
+                        <a href="<?= site_url('user/invoices/show/' . (int) $invoice->id); ?>" class="btn btn-outline-primary">
+                            View invoice
+                        </a>
+                    <?php endif; ?>
+                    <?php if (!empty($receipt)): ?>
+                        <a href="<?= site_url('user/receipts/show/' . (int) $receipt->id); ?>" class="btn btn-outline-primary">
+                            View receipt
+                        </a>
+                    <?php endif; ?>
                     <a href="<?= site_url('user/purchase'); ?>" class="btn btn-outline-primary">
                         Back to my orders
                     </a>

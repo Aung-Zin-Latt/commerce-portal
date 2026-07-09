@@ -32,20 +32,9 @@ class Purchase extends MY_Controller
         $paymentState = $this->input->get('payment');
         $userId = (int) $this->auth->id();
 
-        if ($paymentState === 'success' || $paymentState === 'cancelled') {
-            $data = $this->orderService->getOrderWithItemsForUserOrFail((int) $orderId, $userId);
-
-            if ($paymentState === 'success') {
-                $result = $this->paymentService->syncPaidSessionForOrder($data['order'], $userId);
-
-                $this->session->set_flashdata(
-                    $result['success'] ? 'success' : 'error',
-                    $result['message']
-                );
-            } else {
-                $this->session->set_flashdata('error', 'Payment was cancelled.');
-            }
-
+        // Payment cancelled
+        if ($paymentState === 'cancelled') {
+            $this->session->set_flashdata('error', 'Payment was cancelled.');
             redirect('user/purchase/show/' . (int) $orderId);
         }
 
@@ -56,10 +45,20 @@ class Purchase extends MY_Controller
             $data = $this->orderService->getOrderWithItemsForUserOrFail((int) $orderId, $userId);
         }
 
+        // Invoice
+        $this->load->model('Invoice_model');
+        $invoice = $this->Invoice_model->findByOrderIdForUser((int) $orderId, $userId);
+
+        // Receipt
+        $this->load->model('Receipt_model');
+        $receipt = $this->Receipt_model->findByOrderIdForUser((int) $orderId, $userId);
+
         $this->render_store('user/purchase/show', array(
             'title' => 'Order ' . $data['order']->order_number,
             'order' => $data['order'],
             'items' => $data['items'],
+            'invoice' => $invoice,
+            'receipt' => $receipt,
         ));
     }
 }

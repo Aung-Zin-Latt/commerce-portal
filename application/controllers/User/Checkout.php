@@ -49,10 +49,10 @@ class Checkout extends MY_Controller
         $this->session->set_flashdata('success', $result['message']);
         redirect('user/checkout/confirmation/' . (int) $result['order_id']);
     }
-    public function confirmation($orderId)
+    public function confirmation(int $orderId)
     {
         $data = $this->orderService->getOrderWithItemsForUserOrFail(
-            (int) $orderId,
+            $orderId,
             (int) $this->auth->id()
         );
         $this->render_store('user/checkout/confirmation', array(
@@ -63,13 +63,13 @@ class Checkout extends MY_Controller
     }
 
     // Stripe
-    public function pay($orderId)
+    public function pay(int $orderId)
     {
         if ($this->input->method() !== 'post') {
             show_404();
         }
         $data = $this->orderService->getOrderWithItemsForUserOrFail(
-            (int) $orderId,
+            $orderId,
             (int) $this->auth->id()
         );
         $result = $this->paymentService->createCheckoutSession(
@@ -80,9 +80,38 @@ class Checkout extends MY_Controller
         );
         if (!$result['success']) {
             $this->session->set_flashdata('error', $result['message']);
-            redirect('user/purchase/show/' . (int) $orderId);
+            redirect('user/purchase/show/' . $orderId);
         }
         
         redirect($result['redirect_url']);
     }
+
+    // Payment success page
+    public function success(int $orderId)
+    {
+        $userId = (int) $this->auth->id();
+        $data = $this->orderService->getOrderWithItemsForUserOrFail($orderId, $userId);
+
+        // Confirm payment if webhook hasn't run yet
+        $syncResult = $this->paymentService->syncPaidSessionForOrder($data['order'], $userId);
+
+        // Reload after sync so status/documents are fresh/updated
+        $data = $this->orderService->getOrderWithItemsForUserOrFail($orderId, $userId);
+
+        $this->load->model('Invoice_model');
+        $this->load->model('Receipt_model');
+
+        $invoice = $this->Invoice_model->findByOrderIdForUser($orderId, $userId);
+        $receipt = $this->Receipt_model->findByOrderIdForUser($orderId, $userId);
+
+        $this->render_store('user/checkout/success', array(
+            'title' => 'Payment Successful',
+            'order' => $data['order'],
+            'invoice' => $invoice,
+            'receipt' => $receipt,
+            'sync_success' => !empty($syncResult['success']),
+            'sync_message' => isset($syncResult['message']) ? $syncResult['message'] : '',
+        ));
+    }
+
 }

@@ -65,6 +65,7 @@ $route['user/products/(:num)'] = 'User/Products/show/$1';
 $route['user/cart'] = 'User/Cart/index';
 $route['user/checkout'] = 'User/Checkout/index';
 $route['user/checkout/place'] = 'User/Checkout/place';
+$route['user/checkout/success/(:num)'] = 'User/Checkout/success/$1';
 $route['user/checkout/confirmation/(:num)'] = 'User/Checkout/confirmation/$1';
 $route['user/purchase'] = 'User/Purchase/index';
 $route['user/purchase/show/(:num)'] = 'User/Purchase/show/$1';

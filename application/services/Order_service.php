@@ -121,6 +121,13 @@ class Order_service
         $this->CI->Order_item_model->createMany($rows);
         $cartService->clear();
 
+        // // Audit Log
+        // if (!class_exists('Audit_service', FALSE)) {
+        //     require_once APPPATH . 'services/Audit_service.php';
+        // }
+        // $auditService = new Audit_service();
+        // $auditService->log('order.created', 'order', (int) $orderId, (int) $userId);
+
         $this->CI->db->trans_complete();
 
         if (!$this->CI->db->trans_status() || $orderId <= 0) {

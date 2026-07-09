@@ -37,4 +37,27 @@ class Receipt_model extends CI_Model
             ->get($this->table)
             ->result();
     }
+
+    // Receipts create
+    public function create(array $data)
+    {
+        $this->db->insert($this->table, $data);
+
+        return (int) $this->db->insert_id();
+    }
+    public function findByPaymentId(int $paymentId)
+    {
+        return $this->db
+            ->where('payment_id', $paymentId)
+            ->get($this->table)
+            ->row();
+    }
+    public function findByOrderIdForUser(int $orderId, int $userId)
+    {
+        return $this->db
+            ->where('order_id', $orderId)
+            ->where('user_id', $userId)
+            ->get($this->table)
+            ->row();
+    }
 }

@@ -124,7 +124,8 @@ class Payment_service
             );
         }
 
-        $successUrl = site_url('user/purchase/show/' . (int) $order->id) . '?payment=success';
+        // Payment success URL and cancel URL
+        $successUrl = site_url('user/checkout/success/' . (int) $order->id);
         $cancelUrl = site_url('user/purchase/show/' . (int) $order->id) . '?payment=cancelled';
 
         try {
@@ -372,6 +373,35 @@ class Payment_service
             'payload' => $payloadJson,
             'created_at' => $now,
         ));
+
+        // Invoice
+        if (!class_exists('Invoice_service', FALSE)) {
+            require_once APPPATH . 'services/Invoice_service.php';
+        }
+        $invoiceService = new Invoice_service();
+        $invoiceResult = $invoiceService->createFromPayment($paymentId);
+        if (!$invoiceResult['success']) {
+            $this->CI->db->trans_rollback();
+            return FALSE;
+        }
+
+        // Receipt
+        if (!class_exists('Receipt_service', FALSE)) {
+            require_once APPPATH . 'services/Receipt_service.php';
+        }
+        $receiptService = new Receipt_service();
+        $receiptResult = $receiptService->createFromPayment($paymentId);
+        if (!$receiptResult['success']) {
+            $this->CI->db->trans_rollback();
+            return FALSE;
+        }
+
+        // Audit Log
+        if (!class_exists('Audit_service', FALSE)) {
+            require_once APPPATH . 'services/Audit_service.php';
+        }
+        $auditService = new Audit_service();
+        $auditService->log('payment.completed', 'payment', $paymentId, $order->user_id);
 
         $this->CI->db->trans_complete();
 

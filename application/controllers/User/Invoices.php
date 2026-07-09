@@ -3,19 +3,23 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Invoices extends MY_Controller
 {
+    /** @var Invoice_service */
+    protected $invoiceService;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->load->library('auth');
+        $this->invoiceService = $this->loadService('Invoice_service');
+    }
+    
     public function index()
     {
-        $this->load->library('auth');
-        $this->load->model('Invoice_model');
+        $invoices = $this->invoiceService->listInvoicesForUser((int) $this->auth->id());
 
-        $invoices = $this->Invoice_model->getAllForUser((int) $this->auth->id());
-
-        $this->render_store('user/store/placeholder', array(
+        $this->render_store('user/invoices/index', array(
             'title' => 'Invoices',
-            'page_heading' => 'Invoices',
-            'page_description' => empty($invoices)
-                ? 'No invoices yet. Completed purchases will appear here.'
-                : 'You have ' . count($invoices) . ' invoice(s).',
+            'invoices' => $invoices,
         ));
     }
 
@@ -27,23 +31,28 @@ class Invoices extends MY_Controller
     public function show($id)
     {
         $this->load->model('Invoice_model');
-        $this->load->library('auth');
+        $this->load->model('Invoice_item_model');
 
         if ($this->auth->isAdmin()) {
             $invoice = $this->Invoice_model->findById((int) $id);
+            if (!$invoice) {
+                $this->deny_resource_access();
+                return;
+            }
+            $items = $this->Invoice_item_model->getByInvoiceId((int) $invoice->id);
         } else {
-            $invoice = $this->Invoice_model->findByIdForUser((int) $id, (int) $this->auth->id());
+            $data = $this->invoiceService->getInvoiceWithItemsForUserOrFail(
+                (int) $id,
+                (int) $this->auth->id()
+            );
+            $invoice = $data['invoice'];
+            $items = $data['items'];
         }
 
-        if (!$invoice) {
-            $this->deny_resource_access();
-            return;
-        }
-
-        $this->render_store('user/store/placeholder', array(
+        $this->render_store('user/invoices/show', array(
             'title' => 'Invoice ' . $invoice->invoice_number,
-            'page_heading' => 'Invoice ' . html_escape($invoice->invoice_number),
-            'page_description' => 'Total: ' . html_escape($invoice->currency) . ' ' . html_escape($invoice->total_amount),
+            'invoice' => $invoice,
+            'items' => $items,
         ));
     }
 }
