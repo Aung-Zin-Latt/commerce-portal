@@ -6,6 +6,7 @@
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {
-        "stripe/stripe-php": "^20.3"
+        "stripe/stripe-php": "^20.3",
+        "dompdf/dompdf": "^2.0"
     }
 }

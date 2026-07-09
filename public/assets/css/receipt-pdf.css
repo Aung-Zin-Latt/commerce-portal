@@ -1,0 +1,80 @@
+/* Receipt PDF styles (Dompdf) — keep CSS simple: no flex/grid/rem */
+
+body {
+    font-family: DejaVu Sans, sans-serif;
+    font-size: 12px;
+    color: #222;
+    margin: 28px;
+}
+
+.brand {
+    font-size: 18px;
+    font-weight: bold;
+    color: #1a56db;
+    margin: 0 0 4px 0;
+}
+
+.meta {
+    margin: 12px 0 18px 0;
+    line-height: 1.5;
+}
+
+.title {
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    margin: 18px 0 12px 0;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 16px;
+}
+
+th,
+td {
+    border: 1px solid #222;
+    padding: 8px 10px;
+    vertical-align: top;
+}
+
+th {
+    text-align: center;
+    background: #f7f7f7;
+    font-weight: bold;
+}
+
+.label {
+    width: 35%;
+    text-align: left;
+}
+
+.value {
+    text-align: right;
+}
+
+.section-left {
+    text-align: left;
+}
+
+.section-right {
+    text-align: right;
+}
+
+.total-row td {
+    font-weight: bold;
+}
+
+.footer {
+    text-align: center;
+    font-size: 11px;
+    color: #666;
+    margin-top: 24px;
+}
+
+.divider {
+    border: 0;
+    border-top: 2px solid #1a56db;
+    margin: 8px 0 14px 0;
+}
