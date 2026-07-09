@@ -66,6 +66,52 @@ class Auth_service
     }
 
     /**
+     * Verify credentials without creating a web session.
+     * Used by the API login endpoint.
+     *
+     * @param string $email
+     * @param string $password
+     * @return array
+     */
+    public function verifyCredentials($email, $password)
+    {
+        $user = $this->CI->User_model->findByEmailWithTrashed($email);
+
+        if (!$user) {
+            return array(
+                'success' => FALSE,
+                'message' => 'Invalid email or password.',
+            );
+        }
+
+        if (!empty($user->deleted_at)) {
+            return array(
+                'success' => FALSE,
+                'message' => 'Your account is no longer active.',
+            );
+        }
+
+        if ($user->status !== 'active') {
+            return array(
+                'success' => FALSE,
+                'message' => 'Your account is inactive.',
+            );
+        }
+
+        if (!password_verify($password, $user->password)) {
+            return array(
+                'success' => FALSE,
+                'message' => 'Invalid email or password.',
+            );
+        }
+
+        return array(
+            'success' => TRUE,
+            'user' => $user,
+        );
+    }
+
+    /**
      * Logout current user.
      */
     public function logout()
