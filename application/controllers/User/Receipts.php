@@ -15,11 +15,13 @@ class Receipts extends MY_Controller
 
     public function index()
     {
-        $receipts = $this->receiptService->listReceiptsForUser((int) $this->auth->id());
+        $page = (int) $this->input->get('page');
+        $result = $this->receiptService->listReceiptsForUser((int) $this->auth->id(), $page ?: 1, 10);
 
         $this->render_store('user/receipts/index', array(
             'title' => 'Receipts',
-            'receipts' => $receipts,
+            'receipts' => $result['receipts'],
+            'pagination' => $result,
         ));
     }
 

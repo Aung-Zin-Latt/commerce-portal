@@ -114,9 +114,19 @@ class Invoice_service
     }
 
     // Invoice list for a user
-    public function listInvoicesForUser(int $userId)
+    public function listInvoicesForUser(int $userId, int $page = 1, int $perPage = 10)
     {
-        return $this->CI->Invoice_model->getAllForUser($userId);
+        $meta = pagination_prepare(
+            $this->CI->Invoice_model->countForUser($userId),
+            $page,
+            $perPage
+        );
+
+        return pagination_result(
+            'invoices',
+            $this->CI->Invoice_model->paginateForUser($userId, $meta['per_page'], $meta['offset']),
+            $meta
+        );
     }
     public function getInvoiceForUserOrFail(int $invoiceId, int $userId)
     {
@@ -138,9 +148,19 @@ class Invoice_service
     }
 
     // Admin Invoice List read helper
-    public function listAllInvoices()
+    public function listAllInvoices(int $page = 1, int $perPage = 10)
     {
-        return $this->CI->Invoice_model->getAllInvoicesWithCustomer();
+        $meta = pagination_prepare(
+            $this->CI->Invoice_model->countAll(),
+            $page,
+            $perPage
+        );
+
+        return pagination_result(
+            'invoices',
+            $this->CI->Invoice_model->paginateWithCustomer($meta['per_page'], $meta['offset']),
+            $meta
+        );
     }
     public function getInvoiceWithItemsOrFail(int $invoiceId)
     {

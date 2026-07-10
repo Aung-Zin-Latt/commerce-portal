@@ -57,4 +57,11 @@ $logs = isset($logs) ? $logs : array();
             </table>
         </div>
     </div>
+    <?php
+    $this->load->view('components/list_pagination', array(
+        'pagination' => isset($pagination) ? $pagination : array(),
+        'pagination_base_path' => 'admin/audit-logs',
+        'pagination_aria' => 'Audit logs pagination',
+    ));
+    ?>
 </div>

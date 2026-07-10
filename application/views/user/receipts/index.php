@@ -73,3 +73,13 @@ $receipts = isset($receipts) ? $receipts : array();
         <?php endforeach; ?>
     </div>
 <?php endif; ?>
+
+<?php
+$this->load->view('components/list_pagination', array(
+    'pagination' => isset($pagination) ? $pagination : array(),
+    'pagination_base_path' => 'user/receipts',
+    'pagination_aria' => 'Receipts pagination',
+    'pagination_wrapper_class' => 'mt-4 d-flex justify-content-center',
+    'pagination_nav_class' => 'mb-0 justify-content-center',
+));
+?>

@@ -58,12 +58,6 @@ class Product_service
 
     public function createProduct(array $input)
     {
-        $validation = $this->validateProductInput($input);
-
-        if (!$validation['success']) {
-            return $validation;
-        }
-
         $now = date('Y-m-d H:i:s');
 
         $productId = $this->CI->Product_model->create(array(
@@ -86,11 +80,6 @@ class Product_service
     public function updateProduct(int $id, array $input)
     {
         $product = $this->getProductOrFail($id);
-        $validation = $this->validateProductInput($input, (int) $product->id);
-
-        if (!$validation['success']) {
-            return $validation;
-        }
 
         $this->CI->Product_model->update($product->id, array(
             'sku' => $input['sku'] !== '' ? $input['sku'] : NULL,
@@ -116,26 +105,5 @@ class Product_service
             'success' => TRUE,
             'message' => 'Product deleted successfully.',
         );
-    }
-
-    protected function validateProductInput(array $input, ?int $excludeId = NULL)
-    {
-        if (empty($input['name'])) {
-            return array('success' => FALSE, 'message' => 'Product name is required.');
-        }
-
-        if (!isset($input['price']) || !is_numeric($input['price']) || (float) $input['price'] < 0) {
-            return array('success' => FALSE, 'message' => 'Price must be zero or greater.');
-        }
-
-        if (!in_array($input['status'], array('active', 'inactive'), TRUE)) {
-            return array('success' => FALSE, 'message' => 'Invalid status selected.');
-        }
-
-        if (!empty($input['sku']) && $this->CI->Product_model->skuExists($input['sku'], $excludeId)) {
-            return array('success' => FALSE, 'message' => 'SKU is already in use.');
-        }
-
-        return array('success' => TRUE);
     }
 }

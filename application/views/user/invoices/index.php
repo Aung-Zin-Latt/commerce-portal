@@ -73,3 +73,13 @@ $invoices = isset($invoices) ? $invoices : array();
         <?php endforeach; ?>
     </div>
 <?php endif; ?>
+
+<?php
+$this->load->view('components/list_pagination', array(
+    'pagination' => isset($pagination) ? $pagination : array(),
+    'pagination_base_path' => 'user/invoices',
+    'pagination_aria' => 'Invoices pagination',
+    'pagination_wrapper_class' => 'mt-4 d-flex justify-content-center',
+    'pagination_nav_class' => 'mb-0 justify-content-center',
+));
+?>
