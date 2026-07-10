@@ -34,6 +34,23 @@ class Audit_log_model extends CI_Model
             ->result();
     }
 
+    public function countAll()
+    {
+        return (int) $this->db->count_all($this->table);
+    }
+
+    public function paginateWithUser($limit = 10, $offset = 0)
+    {
+        return $this->db
+            ->select('audit_logs.*, users.name AS user_name, users.email AS user_email')
+            ->from($this->table)
+            ->join('users', 'users.id = audit_logs.user_id', 'left')
+            ->order_by('audit_logs.created_at', 'DESC')
+            ->limit((int) $limit, (int) $offset)
+            ->get()
+            ->result();
+    }
+
     // Audit recent with user
     public function getRecentWithUser(int $limit = 5)
     {

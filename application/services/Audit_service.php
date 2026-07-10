@@ -28,8 +28,18 @@ class Audit_service
         ));
     }
 
-    public function listAllLogs()
+    public function listAllLogs(int $page = 1, int $perPage = 10)
     {
-        return $this->CI->Audit_log_model->getAllWithUser();
+        $meta = pagination_prepare(
+            $this->CI->Audit_log_model->countAll(),
+            $page,
+            $perPage
+        );
+
+        return pagination_result(
+            'logs',
+            $this->CI->Audit_log_model->paginateWithUser($meta['per_page'], $meta['offset']),
+            $meta
+        );
     }
 }

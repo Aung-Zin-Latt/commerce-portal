@@ -55,4 +55,11 @@ $invoices = isset($invoices) ? $invoices : array();
             </table>
         </div>
     </div>
+    <?php
+    $this->load->view('components/list_pagination', array(
+        'pagination' => isset($pagination) ? $pagination : array(),
+        'pagination_base_path' => 'admin/invoices',
+        'pagination_aria' => 'Invoices pagination',
+    ));
+    ?>
 </div>

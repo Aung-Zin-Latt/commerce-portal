@@ -94,6 +94,27 @@ class Payment_service
                 'created_at' => $now,
                 'updated_at' => $now,
             ));
+            $payment = $this->CI->Payment_model->findById($paymentId);
+        }
+
+        // Reuse an open Checkout Session, or expire a stale one before creating another.
+        if ($payment && !empty($payment->provider_reference)) {
+            try {
+                $existingSession = \Stripe\Checkout\Session::retrieve($payment->provider_reference);
+
+                if ($existingSession->status === 'open' && !empty($existingSession->url)) {
+                    return array(
+                        'success' => TRUE,
+                        'redirect_url' => $existingSession->url,
+                    );
+                }
+
+                if ($existingSession->status === 'open') {
+                    \Stripe\Checkout\Session::expire($payment->provider_reference);
+                }
+            } catch (\Exception $exception) {
+                log_message('error', 'Stripe session reuse/expire error: ' . $exception->getMessage());
+            }
         }
 
         $lineItems = array();
@@ -164,6 +185,7 @@ class Payment_service
         if ($payload === '' || $payload === FALSE) {
             return array(
                 'success' => FALSE,
+                'retryable' => FALSE,
                 'message' => 'Empty payload.',
             );
         }
@@ -171,6 +193,7 @@ class Payment_service
         if ($signatureHeader === NULL || $signatureHeader === '') {
             return array(
                 'success' => FALSE,
+                'retryable' => FALSE,
                 'message' => 'Missing Stripe signature.',
             );
         }
@@ -186,11 +209,13 @@ class Payment_service
         } catch (\UnexpectedValueException $exception) {
             return array(
                 'success' => FALSE,
+                'retryable' => FALSE,
                 'message' => 'Invalid payload.',
             );
         } catch (\Stripe\Exception\SignatureVerificationException $exception) {
             return array(
                 'success' => FALSE,
+                'retryable' => FALSE,
                 'message' => 'Invalid signature.',
             );
         }
@@ -205,15 +230,37 @@ class Payment_service
         try {
             if ($event->type === 'checkout.session.completed') {
                 $session = $event->data->object;
+
+                if (!isset($session->payment_status) || $session->payment_status !== 'paid') {
+                    return array(
+                        'success' => TRUE,
+                        'message' => 'Session completed but not paid; ignored.',
+                    );
+                }
+
                 $paymentId = isset($session->metadata->payment_id) ? (int) $session->metadata->payment_id : 0;
 
-                if ($paymentId > 0) {
-                    $this->markOrderPaidFromSession(
-                        $session,
-                        $paymentId,
-                        $event->id,
-                        $event->type,
-                        $event->toJSON()
+                if ($paymentId <= 0) {
+                    return array(
+                        'success' => FALSE,
+                        'retryable' => FALSE,
+                        'message' => 'Missing payment metadata.',
+                    );
+                }
+
+                $updated = $this->markOrderPaidFromSession(
+                    $session,
+                    $paymentId,
+                    $event->id,
+                    $event->type,
+                    $event->toJSON()
+                );
+
+                if (!$updated) {
+                    return array(
+                        'success' => FALSE,
+                        'retryable' => TRUE,
+                        'message' => 'Payment fulfillment failed.',
                     );
                 }
             }
@@ -222,6 +269,7 @@ class Payment_service
 
             return array(
                 'success' => FALSE,
+                'retryable' => TRUE,
                 'message' => 'Webhook processing failed.',
             );
         }
@@ -320,6 +368,10 @@ class Payment_service
 
     protected function markOrderPaidFromSession($session, int $paymentId, string $stripeEventId, string $eventType, string $payloadJson)
     {
+        if (!isset($session->payment_status) || $session->payment_status !== 'paid') {
+            return FALSE;
+        }
+
         $orderId = isset($session->metadata->order_id) ? (int) $session->metadata->order_id : 0;
 
         $payment = $this->CI->Payment_model->findById($paymentId);
@@ -332,10 +384,24 @@ class Payment_service
             $orderId = (int) $payment->order_id;
         }
 
+        if ((int) $payment->order_id !== $orderId) {
+            log_message('error', 'Stripe payment/order mismatch for payment #' . $paymentId);
+            return FALSE;
+        }
+
         $order = $this->CI->db->where('id', $orderId)->get('orders')->row();
 
         if (!$order) {
             return FALSE;
+        }
+
+        if (isset($session->amount_total)) {
+            $expectedCents = (int) round(((float) $order->total_amount) * 100);
+
+            if ((int) $session->amount_total !== $expectedCents) {
+                log_message('error', 'Stripe amount mismatch for order #' . $orderId);
+                return FALSE;
+            }
         }
 
         if ($order->status === 'paid' && $payment->status === 'paid') {
@@ -434,11 +500,16 @@ class Payment_service
             require_once APPPATH . 'services/Email_service.php';
         }
 
-        $emailService = new Email_service();
-        $result = $emailService->sendReceiptEmail($receipt, $order, $user);
+        try {
+            $emailService = new Email_service();
+            $result = $emailService->sendReceiptEmail($receipt, $order, $user);
 
-        if (!$result['success']) {
-            log_message('error', 'Receipt email not sent for payment #' . $paymentId . ': ' . $result['message']);
+            if (!$result['success']) {
+                log_message('error', 'Receipt email not sent for payment #' . $paymentId . ': ' . $result['message']);
+            }
+        } catch (Exception $exception) {
+            // Payment is already committed; never let email failures affect fulfillment.
+            log_message('error', 'Receipt email exception after payment #' . $paymentId . ': ' . $exception->getMessage());
         }
     }
 

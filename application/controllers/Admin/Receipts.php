@@ -14,10 +14,12 @@ class Receipts extends MY_Controller
 
     public function index()
     {
-        $receipts = $this->receiptService->listAllReceipts();
+        $page = (int) $this->input->get('page');
+        $result = $this->receiptService->listAllReceipts($page ?: 1, 10);
         $this->render('admin/receipts/index', array(
             'title' => 'Receipts',
-            'receipts' => $receipts,
+            'receipts' => $result['receipts'],
+            'pagination' => $result,
             'breadcrumbs' => array(
                 'Home' => 'admin/dashboard',
                 'Receipts' => NULL,

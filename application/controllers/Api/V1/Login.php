@@ -15,26 +15,15 @@ class Login extends MY_Api_Controller
             return json_error('Method not allowed.', 405);
         }
 
-        $email = $this->input->post('email', TRUE);
-        $password = $this->input->post('password', TRUE);
+        $request = $this->makeRequest('Api_login_request');
+        $payload = $request->payloadFromRequest();
 
-        // Accept JSON body as well as form-encoded POST.
-        if (($email === NULL || $email === '') && ($password === NULL || $password === '')) {
-            $raw = $this->input->raw_input_stream;
-            $json = json_decode($raw, TRUE);
-
-            if (is_array($json)) {
-                $email = isset($json['email']) ? trim((string) $json['email']) : '';
-                $password = isset($json['password']) ? (string) $json['password'] : '';
-            }
+        if (!$request->setData($payload)->validate()) {
+            return json_error('Validation failed.', 422, $request->errors());
         }
 
-        $email = trim((string) $email);
-        $password = (string) $password;
-
-        if ($email === '' || $password === '') {
-            return json_error('Email and password are required.', 422);
-        }
+        $email = $request->input('email');
+        $password = $request->input('password');
 
         $authService = $this->loadService('Auth_service');
         $result = $authService->verifyCredentials($email, $password);

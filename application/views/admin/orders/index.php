@@ -8,6 +8,10 @@ $status_labels = array(
     'cancelled' => array('label' => 'Cancelled', 'class' => 'text-bg-secondary'),
     'refunded' => array('label' => 'Refunded', 'class' => 'text-bg-info'),
 );
+
+$payment_labels = array(
+    'stripe' => array('label' => 'Stripe', 'class' => 'text-bg-primary'),
+);
 ?>
 
 <div class="card">
@@ -23,6 +27,7 @@ $status_labels = array(
                         <th>Order #</th>
                         <th>Customer</th>
                         <th>Status</th>
+                        <th>Payment</th>
                         <th class="text-end">Total</th>
                         <th>Placed</th>
                         <th class="text-end" style="width: 100px;">Actions</th>
@@ -31,7 +36,7 @@ $status_labels = array(
                 <tbody>
                     <?php if (empty($orders)): ?>
                         <tr>
-                            <td colspan="6" class="text-center text-muted">No orders yet.</td>
+                            <td colspan="7" class="text-center text-muted">No orders yet.</td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($orders as $order): ?>
@@ -39,6 +44,13 @@ $status_labels = array(
                             $status = isset($status_labels[$order->status])
                                 ? $status_labels[$order->status]
                                 : array('label' => ucfirst($order->status), 'class' => 'text-bg-secondary');
+
+                            $providerKey = isset($order->payment_provider) ? strtolower((string) $order->payment_provider) : '';
+                            $payment = ($providerKey !== '' && isset($payment_labels[$providerKey]))
+                                ? $payment_labels[$providerKey]
+                                : ($providerKey !== ''
+                                    ? array('label' => ucfirst($providerKey), 'class' => 'text-bg-secondary')
+                                    : null);
                             ?>
                             <tr>
                                 <td class="fw-semibold">
@@ -54,6 +66,15 @@ $status_labels = array(
                                     <span class="badge <?= html_escape($status['class']); ?>">
                                         <?= html_escape($status['label']); ?>
                                     </span>
+                                </td>
+                                <td>
+                                    <?php if ($payment): ?>
+                                        <span class="badge <?= html_escape($payment['class']); ?>">
+                                            <?= html_escape($payment['label']); ?>
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="text-muted">—</span>
+                                    <?php endif; ?>
                                 </td>
                                 <td class="text-end">
                                     <?= html_escape($order->currency); ?>
@@ -72,4 +93,11 @@ $status_labels = array(
             </table>
         </div>
     </div>
+    <?php
+    $this->load->view('components/list_pagination', array(
+        'pagination' => isset($pagination) ? $pagination : array(),
+        'pagination_base_path' => 'admin/orders',
+        'pagination_aria' => 'Orders pagination',
+    ));
+    ?>
 </div>
