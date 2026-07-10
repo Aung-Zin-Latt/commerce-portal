@@ -97,6 +97,7 @@ $autoload['helper'] = array(
     'url',
     'form',
     'product',
+    'pagination',
 );
 
 /*

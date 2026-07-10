@@ -19,11 +19,13 @@ class Purchase extends MY_Controller
     
     public function index()
     {
-        $orders = $this->orderService->listOrdersForUser((int) $this->auth->id());
+        $page = (int) $this->input->get('page');
+        $result = $this->orderService->listOrdersForUser((int) $this->auth->id(), $page ?: 1, 10);
 
         $this->render_store('user/purchase/index', array(
             'title' => 'Purchase History',
-            'orders' => $orders,
+            'orders' => $result['orders'],
+            'pagination' => $result,
         ));
     }
 

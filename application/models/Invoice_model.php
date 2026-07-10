@@ -41,6 +41,23 @@ class Invoice_model extends CI_Model
             ->result();
     }
 
+    public function countForUser($userId)
+    {
+        return (int) $this->db
+            ->where('user_id', (int) $userId)
+            ->count_all_results($this->table);
+    }
+
+    public function paginateForUser($userId, $limit = 10, $offset = 0)
+    {
+        return $this->db
+            ->where('user_id', (int) $userId)
+            ->order_by('issued_at', 'DESC')
+            ->limit((int) $limit, (int) $offset)
+            ->get($this->table)
+            ->result();
+    }
+
     // Invoice
     public function create(array $data)
     {
@@ -74,6 +91,19 @@ class Invoice_model extends CI_Model
             ->join('users', 'users.id = invoices.user_id')
             ->join('orders', 'orders.id = invoices.order_id')
             ->order_by('invoices.issued_at', 'DESC')
+            ->get()
+            ->result();
+    }
+
+    public function paginateWithCustomer($limit = 10, $offset = 0)
+    {
+        return $this->db
+            ->select('invoices.*, users.name AS customer_name, users.email AS customer_email, orders.order_number')
+            ->from($this->table)
+            ->join('users', 'users.id = invoices.user_id')
+            ->join('orders', 'orders.id = invoices.order_id')
+            ->order_by('invoices.issued_at', 'DESC')
+            ->limit((int) $limit, (int) $offset)
             ->get()
             ->result();
     }

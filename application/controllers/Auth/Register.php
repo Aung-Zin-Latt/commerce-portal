@@ -32,12 +32,9 @@ class Register extends MY_Controller
 
     public function store()
     {
-        $this->form_validation->set_rules('name', 'Name', 'trim|required|min_length[2]|max_length[150]');
-        $this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email|is_unique[users.email]');
-        $this->form_validation->set_rules('password', 'Password', 'required|min_length[8]');
-        $this->form_validation->set_rules('password_confirm', 'Confirm Password', 'required|matches[password]');
+        $request = $this->makeRequest('Register_request');
 
-        if ($this->form_validation->run() === FALSE) {
+        if (!$request->validate()) {
             return $this->redirect_with_validation_errors('register');
         }
 

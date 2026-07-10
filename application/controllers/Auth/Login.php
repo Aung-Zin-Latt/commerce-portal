@@ -35,10 +35,9 @@ class Login extends MY_Controller
      */
     public function authenticate()
     {
-        $this->form_validation->set_rules('email', 'Email', 'trim|required|valid_email');
-        $this->form_validation->set_rules('password', 'Password', 'required');
+        $request = $this->makeRequest('Login_request');
 
-        if ($this->form_validation->run() === FALSE) {
+        if (!$request->validate()) {
             return $this->redirect_with_validation_errors('login');
         }
 

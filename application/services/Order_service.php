@@ -13,9 +13,19 @@ class Order_service
         $this->CI->load->model('Product_model');
     }
 
-    public function listOrdersForUser(int $userId)
+    public function listOrdersForUser(int $userId, int $page = 1, int $perPage = 10)
     {
-        return $this->CI->Order_model->getAllOrdersForUser($userId);
+        $meta = pagination_prepare(
+            $this->CI->Order_model->countForUser($userId),
+            $page,
+            $perPage
+        );
+
+        return pagination_result(
+            'orders',
+            $this->CI->Order_model->paginateForUser($userId, $meta['per_page'], $meta['offset']),
+            $meta
+        );
     }
 
     public function getOrderForUserOrFail(int $orderId, int $userId)
@@ -166,9 +176,19 @@ class Order_service
     }
 
     // Admin Order List read helper
-    public function listAllOrders()
+    public function listAllOrders(int $page = 1, int $perPage = 10)
     {
-        return $this->CI->Order_model->getAllOrdersWithCustomer();
+        $meta = pagination_prepare(
+            $this->CI->Order_model->countAll(),
+            $page,
+            $perPage
+        );
+
+        return pagination_result(
+            'orders',
+            $this->CI->Order_model->paginateWithCustomer($meta['per_page'], $meta['offset']),
+            $meta
+        );
     }
     public function getOrderWithItemsOrFail(int $orderId)
     {

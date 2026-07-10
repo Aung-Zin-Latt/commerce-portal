@@ -8,6 +8,9 @@
 
     <title><?= isset($title) ? $title . ' | Commerce Portal' : 'Commerce Portal'; ?></title>
 
+    <link rel="icon" href="<?= base_url('favicon.svg'); ?>" type="image/svg+xml">
+    <link rel="icon" href="<?= base_url('favicon.ico'); ?>" sizes="any">
+
     <!-- Bootstrap 5 -->
     <link rel="stylesheet" href="<?= base_url('assets/bootstrap/css/bootstrap.min.css'); ?>">
 

@@ -14,6 +14,23 @@ class Order_model extends CI_Model
             ->result();
     }
 
+    public function countForUser(int $userId)
+    {
+        return (int) $this->db
+            ->where('user_id', (int) $userId)
+            ->count_all_results($this->table);
+    }
+
+    public function paginateForUser(int $userId, $limit = 10, $offset = 0)
+    {
+        return $this->db
+            ->where('user_id', (int) $userId)
+            ->order_by('created_at', 'desc')
+            ->limit((int) $limit, (int) $offset)
+            ->get($this->table)
+            ->result();
+    }
+
     public function findByIdForUser(int $orderId, int $userId)
     {
         return $this->db
@@ -48,9 +65,23 @@ class Order_model extends CI_Model
     {
         return $this->db
             ->select('orders.*, users.name AS customer_name, users.email AS customer_email')
+            ->select('(SELECT provider FROM payments WHERE payments.order_id = orders.id ORDER BY id DESC LIMIT 1) AS payment_provider', false)
             ->from($this->table)
             ->join('users', 'users.id = orders.user_id')
             ->order_by('orders.created_at', 'DESC')
+            ->get()
+            ->result();
+    }
+
+    public function paginateWithCustomer($limit = 10, $offset = 0)
+    {
+        return $this->db
+            ->select('orders.*, users.name AS customer_name, users.email AS customer_email')
+            ->select('(SELECT provider FROM payments WHERE payments.order_id = orders.id ORDER BY id DESC LIMIT 1) AS payment_provider', false)
+            ->from($this->table)
+            ->join('users', 'users.id = orders.user_id')
+            ->order_by('orders.created_at', 'DESC')
+            ->limit((int) $limit, (int) $offset)
             ->get()
             ->result();
     }

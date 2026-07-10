@@ -108,19 +108,31 @@ curl -s -X POST http://localhost:8080/api/v1/login \
 
 # Use the returned data.token
 curl -s -H "Authorization: Bearer <TOKEN>" \
-  http://localhost:8080/api/v1/invoices
+  "http://localhost:8080/api/v1/invoices?page=1&per_page=10"
 
 curl -s -H "Authorization: Bearer <TOKEN>" \
-  http://localhost:8080/api/v1/receipts
+  "http://localhost:8080/api/v1/receipts?page=1&per_page=10"
 ```
 
-| Method | Endpoint | Auth |
-|--------|----------|------|
-| `POST` | `/api/v1/login` | Public |
-| `GET`  | `/api/v1/invoices` | Bearer |
-| `GET`  | `/api/v1/invoices/{id}` | Bearer |
-| `GET`  | `/api/v1/receipts` | Bearer |
-| `GET`  | `/api/v1/receipts/{id}` | Bearer |
+| Method | Endpoint | Auth | Notes |
+|--------|----------|------|-------|
+| `POST` | `/api/v1/login` | Public | |
+| `GET`  | `/api/v1/invoices` | Bearer | `?page=` / `?per_page=` (default 10, max 100) |
+| `GET`  | `/api/v1/invoices/{id}` | Bearer | Owner-scoped |
+| `GET`  | `/api/v1/receipts` | Bearer | `?page=` / `?per_page=` (default 10, max 100) |
+| `GET`  | `/api/v1/receipts/{id}` | Bearer | Owner-scoped |
+
+List responses return `{ items, page, per_page, total, total_pages }` inside `data`.
+
+### Pagination
+
+Shared helper: `application/helpers/pagination_helper.php` (`pagination_prepare` / `pagination_result`). UI lists use `?page=`; the API also accepts `per_page`.
+
+| Area | Lists |
+|------|--------|
+| Store | Products catalog, customer invoices, receipts, orders |
+| Admin | Users, products, invoices, receipts, orders, Stripe transactions, audit logs |
+| API | `GET /api/v1/invoices`, `GET /api/v1/receipts` |
 
 ---
 
@@ -181,6 +193,26 @@ If I continued this system, I would push authorization further in a few practica
 
 Hiding a menu item is never enough. Every write/read path has to re-check role and ownership on the server.
 
+### Further product and engineering enhancements
+
+Separately, if I continued this system based on business and engineering needs, I would also consider:
+
+**Catalog & inventory**
+
+- **Stock management** — add `stock_qty`, admin stock adjustments, and check/decrement inside the order transaction so checkout cannot oversell.
+- **SKU auto-generation** — generate unique SKUs on product create (with an optional manual override) instead of relying only on admin-entered values.
+- **Variants / sizes** — model size/color (or similar) as product variants with their own SKU/price/stock, rather than one flat product row.
+
+**Payments lifecycle**
+
+- **Refunds** — the `refunds` table already exists; I would wire Stripe refunds, update payment/order status, and add an admin refund path so the payment lifecycle is complete.
+
+**Engineering**
+
+- **Automated testing** — PHPUnit (or Codeception) around services such as orders, payments, ownership checks, and API auth.
+- **Contracts & repositories** — introduce interfaces/contracts and a `BaseRepo` pattern so data access stays consistent, models stay thin, and persistence can evolve without rewriting controllers/services.
+- **API transformers / resources** — extract `formatInvoice` / `formatReceipt` into dedicated transformer classes (Laravel Resource-style) as the API grows.
+
 ---
 
 ## 4. Mobile API on CodeIgniter 3 — what I would watch for
@@ -193,7 +225,7 @@ For a real mobile app I would still treat this as a starting point, not the fina
 
 - Short-lived access tokens + refresh tokens (30-day static bearers are fine for a demo, not for phones in the wild)
 - HTTPS only; keep `/api/v1` stable and add `/api/v2` for breaking changes
-- Pagination on list endpoints; consistent error codes the app can switch on
+- Consistent error codes the app can switch on (list pagination is already in place — see §1)
 - Idempotency keys around payment-related POSTs
 - Move email/PDF off the request thread (queue + worker) so a slow SMTP provider does not freeze the mobile UX
 
@@ -268,7 +300,7 @@ Webhooks still use Stripe CLI or Ngrok on the host — no extra Docker service r
 
 ## 6. Tools and libraries
 
-### Used in this project
+### What I used
 
 | Tool / library | Role |
 |----------------|------|
@@ -281,9 +313,10 @@ Webhooks still use Stripe CLI or Ngrok on the host — no extra Docker service r
 | **Mailtrap** | Safe email sink in development |
 | **Postman** | API collection with automatic bearer token capture |
 | **Git** | Feature-branch workflow and tagged milestones |
+| **GitHub Actions** | CI on `main` push/PR (`.github/workflows/ci.yml`): Composer install, PHP 7.3 syntax check over `application/`, `docker compose config` |
 | **Mermaid** | ER diagram in documentation |
 
-### Useful additions (not required for this submission)
+### What I would consider next
 
 | Tool | Why |
 |------|-----|
@@ -291,7 +324,7 @@ Webhooks still use Stripe CLI or Ngrok on the host — no extra Docker service r
 | Redis | Sessions, rate limits, queues |
 | Queue workers (Supervisor + Redis/SQS) | Async email, PDF, and webhook processing |
 | OpenAPI (Swagger) | Contract for mobile clients |
-| GitHub Actions | Lint, test, and image build on pull requests |
+| CD / deploy workflow | Promote a green `main` build to staging/production once a host exists |
 | Sentry / CloudWatch | Error and performance monitoring |
 | Ngrok | Alternate public tunnel for Stripe webhooks |
 
@@ -320,7 +353,8 @@ project/
 │   ├── services/      # Business logic (Payment, Invoice, Receipt, Email, …)
 │   ├── models/        # Data access and ownership queries
 │   ├── hooks/         # Auth_middleware
-│   ├── helpers/       # api_helper, product_helper
+│   ├── helpers/       # api_helper, pagination_helper, product_helper
+│   ├── requests/      # Form Request-style validation (auth, API login, products)
 │   └── views/         # AdminLTE / storefront templates
 ├── docs/
 │   ├── database-design.md
@@ -332,17 +366,27 @@ project/
 └── .env.example
 ```
 
-Architecture pattern: **thin controllers → services → models**, with CI3 libraries (`Auth`) for cross-cutting session and API identity.
+Architecture pattern: **thin controllers → services → models**, with CI3 libraries (`Auth`) for session and API identity. Validation lives under `application/requests/` and is loaded through `makeRequest()` (CI Form Validation underneath; `setData()` when the payload is JSON or an array).
 
----
+### OOP & SOLID
 
-## Submission layout
+I lean on OOP and SOLID in day-to-day work. Here I kept that discipline without forcing a heavy framework-style setup onto CI3.
 
-```text
-{applicant_name}.zip
-├── README.md          ← this file
-└── project/           ← application source
-```
+- **S — Single responsibility:** controllers take the HTTP request/response; services hold order/payment/invoice rules; models run queries; request classes hold validation rules.
+- **O — Open/closed (pragmatic):** shared pieces like `Form_request`, `MY_Controller` / `MY_Api_Controller`, and the pagination helpers mean new list screens or forms mostly plug in instead of copy-paste.
+- **D — Dependency direction:** views don’t talk to Stripe or raw SQL; they get data from controllers/services. CI3 has no Laravel-style container, so I used plain service classes rather than inventing a big interface layer for this assessment.
+- **Encapsulation:** payment fulfillment, ownership checks, and token hashing stay in services/libraries so controllers stay short.
+
+Liskov and Interface Segregation matter more once you have many interchangeable implementations. I would add real contracts/`BaseRepo` when the API and team grow; for this portal, clear classes beat ceremony.
+
+### Error handling (short note)
+
+I keep two tools for two jobs:
+
+- **DB transactions** — multi-step writes that must stay consistent (place order; mark payment paid + create invoice/receipt/audit). If a step fails, the whole unit rolls back.
+- **`try/catch`** — external or library failures (Stripe Checkout/webhooks/sync, Dompdf, SMTP email). Those paths log the error and return a safe result instead of crashing the request.
+
+Receipt email runs **after** the payment transaction commits, so a mail/PDF problem never undoes a successful charge.
 
 ---
 
