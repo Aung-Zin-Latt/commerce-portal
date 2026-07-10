@@ -15,11 +15,13 @@ class Invoices extends MY_Controller
     
     public function index()
     {
-        $invoices = $this->invoiceService->listInvoicesForUser((int) $this->auth->id());
+        $page = (int) $this->input->get('page');
+        $result = $this->invoiceService->listInvoicesForUser((int) $this->auth->id(), $page ?: 1, 10);
 
         $this->render_store('user/invoices/index', array(
             'title' => 'Invoices',
-            'invoices' => $invoices,
+            'invoices' => $result['invoices'],
+            'pagination' => $result,
         ));
     }
 

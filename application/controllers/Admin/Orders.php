@@ -14,11 +14,13 @@ class Orders extends MY_Controller
 
     public function index()
     {
-        $orders = $this->orderService->listAllOrders();
+        $page = (int) $this->input->get('page');
+        $result = $this->orderService->listAllOrders($page ?: 1, 10);
 
         $this->render('admin/orders/index', array(
             'title' => 'Orders',
-            'orders' => $orders,
+            'orders' => $result['orders'],
+            'pagination' => $result,
             'breadcrumbs' => array(
                 'Home' => 'admin/dashboard',
                 'Orders' => NULL,

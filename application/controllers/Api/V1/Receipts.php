@@ -14,14 +14,26 @@ class Receipts extends MY_Api_Controller
 
     public function index()
     {
-        $rows = $this->receiptService->listReceiptsForUser((int) $this->auth->id());
-        $list = array();
+        $page = (int) $this->input->get('page');
+        $perPage = (int) $this->input->get('per_page');
+        $result = $this->receiptService->listReceiptsForUser(
+            (int) $this->auth->id(),
+            $page ?: 1,
+            $perPage ?: 10
+        );
 
-        foreach ($rows as $row) {
+        $list = array();
+        foreach ($result['receipts'] as $row) {
             $list[] = $this->formatReceipt($row);
         }
 
-        return json_success($list);
+        return json_success(array(
+            'items' => $list,
+            'page' => $result['page'],
+            'per_page' => $result['per_page'],
+            'total' => $result['total'],
+            'total_pages' => $result['total_pages'],
+        ));
     }
 
     public function show($id)

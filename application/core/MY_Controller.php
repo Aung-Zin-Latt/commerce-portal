@@ -150,6 +150,22 @@ class MY_Controller extends CI_Controller
 
         return redirect($redirectUrl);
     }
+
+    // Custom form request (Laravel-style wrapper around CI Form Validation)
+    protected function makeRequest($class)
+    {
+        if (!class_exists('Form_request', FALSE)) {
+            require_once APPPATH . 'requests/Form_request.php';
+        }
+
+        $file = APPPATH . 'requests/' . $class . '.php';
+
+        if (!class_exists($class, FALSE)) {
+            require_once $file;
+        }
+
+        return new $class();
+    }
 }
 
 /**
@@ -180,5 +196,26 @@ class MY_Api_Controller extends CI_Controller
         }
 
         return new $service();
+    }
+
+    /**
+     * Load a Form Request class under application/requests/.
+     *
+     * @param string $class
+     * @return object
+     */
+    protected function makeRequest($class)
+    {
+        if (!class_exists('Form_request', FALSE)) {
+            require_once APPPATH . 'requests/Form_request.php';
+        }
+
+        $file = APPPATH . 'requests/' . $class . '.php';
+
+        if (!class_exists($class, FALSE)) {
+            require_once $file;
+        }
+
+        return new $class();
     }
 }

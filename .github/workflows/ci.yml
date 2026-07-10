@@ -1,0 +1,58 @@
+name: CI
+
+# Run on pushes and PRs targeting main
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Read-only is enough for CI (no deploy / write tokens)
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: PHP 7.3 checks
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Get our code onto the runner
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. Same PHP major version as local/Docker
+      - name: Setup PHP 7.3
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "7.3"
+          extensions: mbstring, mysqli, gd, zip, intl
+          coverage: none
+          tools: composer:v2
+
+      # 3. Cache Composer downloads (faster next runs)
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: ~/.composer/cache
+          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            composer-${{ runner.os }}-
+
+      # 4. Install locked dependencies (Stripe & Dompdf)
+      # Same idea as: docker compose exec php composer install
+      - name: Composer install
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      # 5. Prove every application PHP file still parses
+      - name: PHP syntax check (application/)
+        run: |
+          find application -type f -name "*.php" -print0 \
+            | xargs -0 -n1 php -l
+
+      # 6. Validate docker-compose.yml syntax
+      # Compose references env_file: .env (gitignored) — use the example for CI.
+      - name: Docker Compose config
+        run: |
+          cp .env.example .env
+          docker compose config --quiet

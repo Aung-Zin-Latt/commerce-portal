@@ -15,7 +15,14 @@ class Stripe extends CI_Controller
         $paymentService = new Payment_service();
         $result = $paymentService->handleWebhook($payload, $signature);
 
-        $statusCode = $result['success'] ? 200 : 400;
+        // 400 = bad request (do not retry forever); 500 = transient fulfillment failure (Stripe retries)
+        if (!empty($result['success'])) {
+            $statusCode = 200;
+        } elseif (!empty($result['retryable'])) {
+            $statusCode = 500;
+        } else {
+            $statusCode = 400;
+        }
 
         $this->output
             ->set_status_header($statusCode)

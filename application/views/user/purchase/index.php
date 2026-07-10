@@ -100,3 +100,13 @@ $status_labels = array(
         <?php endforeach; ?>
     </div>
 <?php endif; ?>
+
+<?php
+$this->load->view('components/list_pagination', array(
+    'pagination' => isset($pagination) ? $pagination : array(),
+    'pagination_base_path' => 'user/purchase',
+    'pagination_aria' => 'Orders pagination',
+    'pagination_wrapper_class' => 'mt-4 d-flex justify-content-center',
+    'pagination_nav_class' => 'mb-0 justify-content-center',
+));
+?>

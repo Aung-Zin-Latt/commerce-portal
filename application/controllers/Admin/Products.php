@@ -53,13 +53,24 @@ class Products extends MY_Controller
 
     public function store()
     {
-        $result = $this->productService->createProduct(array(
+        $input = array(
             'sku' => $this->input->post('sku', TRUE),
             'name' => $this->input->post('name', TRUE),
             'description' => $this->input->post('description', TRUE),
             'price' => $this->input->post('price'),
             'status' => $this->input->post('status', TRUE),
-        ));
+        );
+
+        $request = $this->makeRequest('Store_product_request');
+
+        if (!$request->setData($input)->validate()) {
+            $errors = $request->errors();
+            $this->session->set_flashdata('error', reset($errors));
+            $this->session->set_flashdata('old_input', $input);
+            return redirect('admin/products/create');
+        }
+
+        $result = $this->productService->createProduct($input);
 
         if (!$result['success']) {
             $this->session->set_flashdata('error', $result['message']);
@@ -89,13 +100,25 @@ class Products extends MY_Controller
 
     public function update($id)
     {
-        $result = $this->productService->updateProduct($id, array(
+        $input = array(
             'sku' => $this->input->post('sku', TRUE),
             'name' => $this->input->post('name', TRUE),
             'description' => $this->input->post('description', TRUE),
             'price' => $this->input->post('price'),
             'status' => $this->input->post('status', TRUE),
-        ));
+        );
+
+        $request = $this->makeRequest('Store_product_request');
+        $request->excludeProductId((int) $id);
+
+        if (!$request->setData($input)->validate()) {
+            $errors = $request->errors();
+            $this->session->set_flashdata('error', reset($errors));
+            $this->session->set_flashdata('old_input', $input);
+            return redirect('admin/products/edit/' . (int) $id);
+        }
+
+        $result = $this->productService->updateProduct($id, $input);
 
         if (!$result['success']) {
             $this->session->set_flashdata('error', $result['message']);

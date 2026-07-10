@@ -85,9 +85,19 @@ class Receipt_service
         return $prefix . str_pad((string) $next, 4, '0', STR_PAD_LEFT);
     }
 
-    public function listReceiptsForUser(int $userId)
+    public function listReceiptsForUser(int $userId, int $page = 1, int $perPage = 10)
     {
-        return $this->CI->Receipt_model->getAllForUser($userId);
+        $meta = pagination_prepare(
+            $this->CI->Receipt_model->countForUser($userId),
+            $page,
+            $perPage
+        );
+
+        return pagination_result(
+            'receipts',
+            $this->CI->Receipt_model->paginateForUser($userId, $meta['per_page'], $meta['offset']),
+            $meta
+        );
     }
     public function getReceiptForUserOrFail(int $receiptId, int $userId)
     {
@@ -99,9 +109,19 @@ class Receipt_service
     }
 
     // Admin Receipt List read helper
-    public function listAllReceipts()
+    public function listAllReceipts(int $page = 1, int $perPage = 10)
     {
-        return $this->CI->Receipt_model->getAllReceiptsWithCustomer();
+        $meta = pagination_prepare(
+            $this->CI->Receipt_model->countAll(),
+            $page,
+            $perPage
+        );
+
+        return pagination_result(
+            'receipts',
+            $this->CI->Receipt_model->paginateWithCustomer($meta['per_page'], $meta['offset']),
+            $meta
+        );
     }
     public function getReceiptOrFail(int $receiptId)
     {

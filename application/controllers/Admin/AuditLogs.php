@@ -14,11 +14,13 @@ class AuditLogs extends MY_Controller
 
     public function index()
     {
-        $logs = $this->auditService->listAllLogs();
+        $page = (int) $this->input->get('page');
+        $result = $this->auditService->listAllLogs($page ?: 1, 10);
 
         $this->render('admin/audit_logs/index', array(
             'title' => 'Audit Logs',
-            'logs' => $logs,
+            'logs' => $result['logs'],
+            'pagination' => $result,
             'breadcrumbs' => array(
                 'Home' => 'admin/dashboard',
                 'Audit Logs' => NULL,

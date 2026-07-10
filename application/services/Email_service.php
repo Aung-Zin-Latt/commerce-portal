@@ -75,41 +75,50 @@ class Email_service
         $pdfService = new Receipt_pdf_service();
         $pdfPath = $pdfService->generateReceiptPdf($receipt, $order, $user);
 
-        $this->CI->load->library('email');
-        $this->CI->config->load('email', TRUE);
-        $this->CI->email->initialize($this->CI->config->item('email'));
-        $this->CI->email->clear(TRUE);
+        try {
+            $this->CI->load->library('email');
+            $this->CI->config->load('email', TRUE);
+            $this->CI->email->initialize($this->CI->config->item('email'));
+            $this->CI->email->clear(TRUE);
 
-        $this->CI->email->from($fromEmail, $fromName);
-        $this->CI->email->to($user->email);
-        $this->CI->email->subject('Your receipt ' . $receipt->receipt_number);
-        $this->CI->email->message($body);
+            $this->CI->email->from($fromEmail, $fromName);
+            $this->CI->email->to($user->email);
+            $this->CI->email->subject('Your receipt ' . $receipt->receipt_number);
+            $this->CI->email->message($body);
 
-        if ($pdfPath && is_file($pdfPath)) {
-            $this->CI->email->attach($pdfPath);
-        } else {
-            log_message('error', 'Receipt PDF missing for receipt #' . (int) $receipt->id . '; sending email without attachment.');
-        }
+            if ($pdfPath && is_file($pdfPath)) {
+                $this->CI->email->attach($pdfPath);
+            } else {
+                log_message('error', 'Receipt PDF missing for receipt #' . (int) $receipt->id . '; sending email without attachment.');
+            }
 
-        $sent = $this->CI->email->send();
+            $sent = $this->CI->email->send();
 
-        if ($pdfPath && is_file($pdfPath)) {
-            @unlink($pdfPath);
-        }
+            if ($sent) {
+                return array(
+                    'success' => TRUE,
+                    'message' => 'Receipt email sent successfully.',
+                );
+            }
 
-        if ($sent) {
+            $debug = $this->CI->email->print_debugger(array('headers'));
+            log_message('error', 'Receipt email failed for receipt #' . (int) $receipt->id . ': ' . $debug);
+
             return array(
-                'success' => TRUE,
-                'message' => 'Receipt email sent successfully.',
+                'success' => FALSE,
+                'message' => 'Unable to send receipt email.',
             );
+        } catch (Exception $exception) {
+            log_message('error', 'Receipt email exception for receipt #' . (int) $receipt->id . ': ' . $exception->getMessage());
+
+            return array(
+                'success' => FALSE,
+                'message' => 'Unable to send receipt email.',
+            );
+        } finally {
+            if ($pdfPath && is_file($pdfPath)) {
+                @unlink($pdfPath);
+            }
         }
-
-        $debug = $this->CI->email->print_debugger(array('headers'));
-        log_message('error', 'Receipt email failed for receipt #' . (int) $receipt->id . ': ' . $debug);
-
-        return array(
-            'success' => FALSE,
-            'message' => 'Unable to send receipt email.',
-        );
     }
 }
