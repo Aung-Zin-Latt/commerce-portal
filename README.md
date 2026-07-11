@@ -182,13 +182,15 @@ Today the app already blocks the obvious gaps:
 - **Role level** — admin vs customer; wrong role is redirected away
 - **Record level** — invoices/receipts are loaded with `user_id` filters; another user’s document returns **404** (not 403), so we don’t leak that the record exists
 - **API** — hashed bearer tokens in `api_tokens`; no reliance on browser session cookies
+- **Rate limiting (throttling)** — web login and API login are limited per IP via `Rate_limit_middleware` (file counters under `application/cache/rate_limit/`)
+- **Input sanitization** — global `Sanitize_input_middleware` runs `strip_tags` on POST/GET strings; passwords and Stripe `webhooks/` are excluded
 
 If I continued this system, I would push authorization further in a few practical ways:
 
 1. **Finer permissions** — not only `admin` / `customer`, but capabilities like `products.manage` or `invoices.read_all`, so a future “support staff” role does not need a new middleware rewrite.
 2. **One policy place** — keep “can this user touch this invoice?” in a small service/policy layer so every controller does not re-implement the same check.
 3. **Harder sessions & tokens** — idle timeout, regenerate session on login/role change, shorter API token TTL, named tokens with revoke, and refresh tokens if mobile becomes real traffic.
-4. **Rate limits + MFA for admins** — login and API login are already rate-limited per IP (`Rate_limit_middleware`); I would still add TOTP for admin before go-live. Incoming POST/GET strings are sanitized globally via `Sanitize_input_middleware` (`strip_tags`; passwords and Stripe webhooks excluded).
+4. **MFA for admins** — add TOTP for admin before go-live (rate limiting is already in place).
 5. **Broader audit** — today `payment.completed` is audited; I would also log admin user/product changes, failed logins, and token revoke events.
 
 Hiding a menu item is never enough. Every write/read path has to re-check role and ownership on the server.
