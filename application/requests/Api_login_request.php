@@ -21,7 +21,7 @@ class Api_login_request extends Form_request
     public function payloadFromRequest()
     {
         $email = $this->CI->input->post('email', TRUE);
-        $password = $this->CI->input->post('password', TRUE);
+        $password = $this->CI->input->post('password'); // no XSS clean — passwords may contain < >
 
         if (($email === NULL || $email === '') && ($password === NULL || $password === '')) {
             $raw = $this->CI->input->raw_input_stream;
@@ -34,8 +34,8 @@ class Api_login_request extends Form_request
         }
 
         return array(
-            'email' => trim((string) $email),
-            'password' => (string) $password,
+            'email' => strip_tags(trim((string) $email)),
+            'password' => (string) $password, // never strip_tags / XSS-clean passwords
         );
     }
 }

@@ -12,6 +12,22 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |
 */
 
+// Sanitize → Rate limit → Auth (order matters)
+$hook['post_controller_constructor'][] = array(
+    'class'    => 'Sanitize_input_middleware',
+    'function' => 'run',
+    'filename' => 'Sanitize_input_middleware.php',
+    'filepath' => 'hooks',
+);
+
+// Throttle middleware runs first to limit API requests
+$hook['post_controller_constructor'][] = array(
+    'class'    => 'Rate_limit_middleware',
+    'function' => 'run',
+    'filename' => 'Rate_limit_middleware.php',
+    'filepath' => 'hooks',
+);
+
 $hook['post_controller_constructor'][] = array(
     'class'    => 'Auth_middleware',
     'function' => 'run',
