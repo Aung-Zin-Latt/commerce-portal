@@ -207,13 +207,20 @@ Separately, if I continued this system based on business and engineering needs, 
 
 **Payments lifecycle**
 
-- **Refunds** — the `refunds` table already exists; I would wire Stripe refunds, update payment/order status, and add an admin refund path so the payment lifecycle is complete.
+- **Full and partial refunds** — the `refunds` table already exists; I would wire Stripe refunds for both full and partial amounts, update payment/order status, keep invoice/receipt history consistent, and add an admin refund path so the payment lifecycle is complete.
 
 **Engineering**
 
 - **Automated testing** — PHPUnit (or Codeception) around services such as orders, payments, ownership checks, and API auth.
 - **Contracts & repositories** — introduce interfaces/contracts and a `BaseRepo` pattern so data access stays consistent, models stay thin, and persistence can evolve without rewriting controllers/services.
 - **API transformers / resources** — extract `formatInvoice` / `formatReceipt` into dedicated transformer classes (Laravel Resource-style) as the API grows.
+- **CQRS (where it helps)** — keep simple CRUD as-is, but split heavy read paths (admin reports, invoice/receipt lists, dashboards) from write paths (place order, mark paid, refund) so reporting queries do not contend with checkout traffic.
+- **Security hardening** — MFA for admins, stricter session/token TTL, dependency scanning, security headers, and periodic review of webhook/signature and ownership checks under load.
+- **Performance** — core single-column and composite indexes are already in the migrations (see `docs/database-design.md`); next I would add cache for the product catalog/session, queue email and PDF generation, and profile slow admin list queries before adding more hardware.
+
+**If the product grew much larger**
+
+I would not jump to microservices for this assessment-sized portal. If order volume, team size, and release cadence justified it, I would split bounded contexts (catalog, checkout/payments, invoicing, notifications) and use a message broker such as **RabbitMQ** for async events (`payment.completed`, `receipt.email`, refunds) between services — with the current modular services as the starting seam.
 
 ---
 
@@ -325,6 +332,7 @@ Webhooks still use Stripe CLI or Ngrok on the host — no extra Docker service r
 | PHPUnit / Codeception | Automated tests for services and API |
 | Redis | Sessions, rate limits, queues |
 | Queue workers (Supervisor + Redis/SQS) | Async email, PDF, and webhook processing |
+| RabbitMQ | Event bus if the system were split into services (payments, invoicing, notifications) |
 | OpenAPI (Swagger) | Contract for mobile clients |
 | CD / deploy workflow | Promote a green `main` build to staging/production once a host exists |
 | Sentry / CloudWatch | Error and performance monitoring |
